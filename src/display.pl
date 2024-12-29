@@ -31,7 +31,7 @@ display_rows(Board) :-
   display_rowsAux(Board, 5, 0).
 
 
-display_rowsAux([Row | Rest], 1, _) :-
+display_rowsAux([Row | _], 1, _) :-
     display_row(Row), !.
 
 display_rowsAux([Row | Rest], N, 0):-

@@ -1,14 +1,24 @@
 :- consult(game).
-:- use_module(library(lists)).
 
 run :-
   boardaccess,
   write('Board Access done'),nl,
   % display_tests,
   % write('display_tests done'),nl,
+  valid_moves3,
+  write('valid_moves3 done'),nl,
 
   valid_moves2,
   write('valid_moves2 done'),nl,
+
+  in_sight_col3,
+  write('in_sight_col3 done'),nl,
+
+  in_sight_row3,
+  write('in_sight_row3 done'),nl,
+
+  in_sight_diagonal3,
+  write('in_sight_diagonal3 done'),nl,
   !.
 
 
@@ -26,13 +36,18 @@ boardaccess :-
   access_board(Testboard, [2,4],Val2),
   Val2 = 'a2'.
 
-  
+valid_moves3 :-
+  testBoard(3,Testboard),
+  valid_moves([Testboard, a], Positions),
+  Positions = [[1,3],[2,2]],
+  valid_moves([Testboard, b], Positions2),
+  Positions2 = [[1,1],[2,2],[3,1],[4,4],[4,5],[5,4]].
 
 valid_moves2 :-
   testBoard(2,Testboard),
-  find_biggest_stacks(Testboard, a, Positions, MaxNum),
+  find_biggest_stacks(Testboard, a, Positions, _),
   Positions = [[2,4]],
-  find_biggest_stacks(Testboard, b, Positions2, MaxNum2),
+  find_biggest_stacks(Testboard, b, Positions2, _),
   Positions2 = [[3,2],[4,2]],
 
   valid_moves([Testboard, b], Positions3),
@@ -42,7 +57,27 @@ valid_moves2 :-
   valid_moves([Testboard, a], Positions4),
   Positions4 = [[1,3],[1,4],[1,5],[2,3],[2,5],[3,4],[3,5]
 ].
-  
+
+in_sight_col3 :-
+  testBoard(3,Testboard),
+  in_sight_col([Testboard, a], [2,2],Locations),
+  Locations = [[2,3]],
+  in_sight_col([Testboard, b], [4,4],Locations2),
+  Locations2 = [[4,2]].
+
+in_sight_row3 :-
+  testBoard(3,Testboard),
+  in_sight_row([Testboard, a], [4,4],Locations),
+  Locations = [[2,4]],
+  in_sight_row([Testboard, a], [5,3],Locations2),
+  Locations2 = [[3,3]].
+
+in_sight_diagonal3 :-
+  testBoard(3,Testboard),
+  in_sight_diagonal([Testboard, a], [4,4], Locations, 0),
+  Locations = [[3,3]],
+  in_sight_diagonal([Testboard, a], [3,3], Locations2, 0),
+  Locations2 = [[2,4]].
 
 display_tests :-
   fontTest,
@@ -88,6 +123,18 @@ testBoard(2, [[-,-,-,-,-],
               [-,a2,-,-,-],
               [-,-,a1,-,-],
               [-,-,b1,b1,-],
+              [-,-,-,-,-]]).
+
+testBoard(3, [[-,a2,-,-,b3], 
+              [-,a2,-,-,-],
+              [-,a3,a1,-,-],
+              [-,-,b1,b1,-],
+              [-,b3,-,-,-]]).
+
+testBoard(4, [[-,-,-,-,-], 
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
               [-,-,-,-,-]]).
 
 

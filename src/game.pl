@@ -11,6 +11,7 @@
 
 :- consult(display).
 :- use_module(library(between)).
+:- use_module(library(lists)).
 
 play :- 
   board(5,Board),
@@ -61,9 +62,9 @@ position_board([X,Y], [X,Y1]) :-
 valid_moves([Board, Next], Positions) :-
   % Check for the biggest stack
   find_biggest_stacks(Board, Next, StackPositions, Max),
-  valid_movesAux([Board, Next], Max, StackPositions, Positions).
+  valid_movesAux(Board, Max, StackPositions, Positions).
 
-valid_movesAux([Board, Next], 1,_, Positions) :-
+valid_movesAux(Board, 1,_, Positions) :-
   % Every Position without a piece is valid 
   findall([Row,Col],
       (between(1, 5, Col),
@@ -71,7 +72,7 @@ valid_movesAux([Board, Next], 1,_, Positions) :-
       access_board(Board,[Row,Col], Elem),
       Elem = '-'), Positions).
 
-valid_movesAux([Board, Next], 0,_, Positions) :-
+valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
   findall([Row,Col],
       (between(1, 5, Col),
@@ -79,7 +80,7 @@ valid_movesAux([Board, Next], 0,_, Positions) :-
       access_board(Board,[Row,Col], Elem),
       Elem = '-'), Positions).
 
-valid_movesAux([Board, Next], _, StackPositions, Positions) :-
+valid_movesAux(Board, _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
     findall([Row,Col],
         (member([StackRow,StackCol], StackPositions),
@@ -127,8 +128,98 @@ adjacent(Row, Col, NewRow, NewCol) :-
       NewRow is Row - 1, NewCol is Col + 1;
       NewRow is Row - 1, NewCol is Col - 1)).
 
+in_sight(Gamestate, [Row,Col], Locations):-
+    in_sight_row(Gamestate, [Row,Col], Rows),
+    in_sight_col(Gamestate, [Row, Col], Cols),
+    Intersection is ((Row + Col) mod 2),
+    in_sight_diagonal(Gamestate, [Row, Col], Diags, Intersection),
+    append(Rows,Cols,RowsCols),
+    append(RowsCols,Diags,Locations).
+
+% Find the first non empty space for each side
+in_sight_col([Board, Next], [Row,SCol], Locations) :-
+    RightCol is SCol + 1,
+    findall([Row,Col], 
+        (between(RightCol, 5, Col),
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-',!, % this cut makes it so it stops on first element
+         atom_chars(Elem, [Next|_])),
+        RightLocs),
+    LeftCol is SCol - 1,
+    findall([Row,Col], 
+        (between(1, LeftCol, SearchCol),
+         Col is LeftCol - SearchCol,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        LeftLocs),
+    append(LeftLocs,RightLocs,Locations).
+
+in_sight_row([Board, Next], [SRow,Col], Locations) :-
+    RightRow is SRow + 1,
+    findall([Row,Col], 
+        (between(RightRow, 5, Row),
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-',!, % this cut makes it so it stops on first element
+         atom_chars(Elem, [Next|_])),
+        RightLocs),
+    LeftRow is SRow - 1,
+    findall([Row,Col], 
+        (between(1, LeftRow, SearchRow),
+         Row is LeftRow -SearchRow,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        LeftLocs),
+    append(LeftLocs,RightLocs,Locations).
 
 
+in_sight_diagonal(_,_,[], 1).
+
+in_sight_diagonal([Board, Next], [SRow,SCol], Locations, 0) :-
+    % Down-right diagonal
+    findall([Row,Col], 
+        (between(1, 5, Step),
+         Row is SRow + Step,
+         Col is SCol + Step,
+         Row =< 5, Col =< 5,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        DRLocs),
+    % Down-left diagonal
+    findall([Row,Col], 
+        (between(1, 5, Step),
+         Row is SRow + Step,
+         Col is SCol - Step,
+         Row =< 5, Col >= 1,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        DLLocs),
+    % Up-right diagonal
+    findall([Row,Col], 
+        (between(1, 5, Step),
+         Row is SRow - Step,
+         Col is SCol + Step,
+         Row >= 1, Col =< 5,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        URLocs),
+    % Up-left diagonal
+    findall([Row,Col], 
+        (between(1, 5, Step),
+         Row is SRow - Step,
+         Col is SCol - Step,
+         Row >= 1, Col >= 1,
+         access_board(Board, [Row,Col], Elem),
+         Elem \= '-', !,
+         atom_chars(Elem, [Next|_])),
+        ULLocs),
+    append(DRLocs, DLLocs, DownLocs),
+    append(URLocs, ULLocs, UpLocs),
+    append(DownLocs, UpLocs, Locations).
 
 
   
