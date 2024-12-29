@@ -43,6 +43,11 @@ handle_choice(3) :-
   write('2 - Smart'), nl,
   read(Choice2).
 
+access_board(Board,[X,Y], Val) :-
+  Y1 is 6 - Y,
+  nth1(Y1, Board, Row),
+  nth1(X,Row,Val).
+  
 
 
 validate_move([Board, Next], [X,Y]) :-

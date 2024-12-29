@@ -6,9 +6,18 @@ board(5,[
         [-,-,-,-,-]
         ]).
 
+lettermap(a1,'K').
+lettermap(a2,'V').
+lettermap(a3,'B').
+lettermap(a4,'P').
+lettermap(b1,'Z').
+lettermap(b2,'Q').
+lettermap(b3,'J').
+lettermap(b4,'X').
+
 display_game([Board,Next]) :-
   display_title(Next),
-  display_rows(Board),
+  display_rows(Board),nl,
   display_options(Board).
 
 display_options(Board).
@@ -39,7 +48,8 @@ display_row([-| Rest]):-
   display_row(Rest).
 
 display_row([Char | Rest]):-
-  write(Char),
+  lettermap(Char, Val),
+  write(Val),
   (Rest \= [] -> write('---') ; true ),
   display_row(Rest).
 
