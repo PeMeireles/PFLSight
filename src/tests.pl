@@ -4,13 +4,40 @@
 run :-
   boardaccess,
   write('Board Access done'),nl,
-  display_tests,
-  write('display_tests done'),nl.
-  
-  validate_move1,
-  validate_move2,
-  
+  % display_tests,
+  % write('display_tests done'),nl,
+
+  valid_moves2,
+  write('valid_moves2 done'),nl,
   !.
+
+
+
+boardaccess :-
+  testBoard(2,Testboard),
+  nth1(1, Testboard, Row),
+  nth1(1, Row, Elem),
+  Elem = '-',
+  nth1(2, Testboard, Row2),
+  nth1(2, Row2, Elem2),
+  Elem2 = 'a2',
+  access_board(Testboard, [3,2],Val),
+  Val = 'b1'.
+  access_board(Testboard, [2,2],Val),
+  Val = 'a2'.
+
+  
+
+valid_moves2 :-
+  testBoard(2,Testboard),
+  find_biggest_stacks(Testboard, a, Positions, MaxNum),
+  Positions = [[2,2]],
+  find_biggest_stacks(Testboard, b, Positions2, MaxNum2),
+  Positions2 = [[3,4],[4,4]].
+
+  %valid_moves([TestBoard, a]),
+  %write('validatemove1 done'),
+  
 
 display_tests :-
   fontTest,
@@ -45,37 +72,6 @@ fontTest :-
   write(Val8),nl.
 
 
-boardaccess :-
-  testBoard(2,Testboard),
-  nth1(1, Testboard, Row),
-  nth1(1, Row, Elem),
-  Elem = '-',
-  nth1(2, Testboard, Row2),
-  nth1(2, Row2, Elem2),
-  Elem2 = 'a2',
-  access_board(Testboard, [3,2],Val),
-  Val = 'b1'.
-  access_board(Testboard, [2,2],Val),
-  Val = 'a2'.
-
-  
-
-validate_move1:-
-  testBoard(1,TestBoard),
-  validate_move([TestBoard, 1],[5,1]),
-  write('validatemove1 done'),
-  
-
-validate_move2:-
-  testBoard(2,TestBoard),
-  validate_move([TestBoard, 1],[5,1]),
-  write('validatemove2.1 done'),
-  \+ validate_move([TestBoard, 1],[5,2]),
-  write('validatemove2.2 done').
-
-
-
-
 
 testBoard(1, [[-,-,-,-,-], 
               [-,-,-,-,-],
@@ -85,6 +81,6 @@ testBoard(1, [[-,-,-,-,-],
 
 testBoard(2, [[-,-,-,-,-], 
               [-,a2,-,-,-],
-              [-,-,-,-,-],
+              [-,-,a1,-,-],
               [-,-,b1,b1,-],
               [-,-,-,-,-]]).
