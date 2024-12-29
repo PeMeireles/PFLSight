@@ -46,10 +46,8 @@ handle_choice(3) :-
 
 access_board(Board,[X,Y], Val) :-
   Y1 is 6 - Y,
-  Y1 > 0,
-  Y1 =< 5,
-  X > 0,
-  X =< 5, 
+  between(1, 5, X),
+  between(1, 5, Y1),
   nth1(Y1, Board, Row),
   nth1(X,Row,Val).
   
@@ -60,8 +58,44 @@ positions_board(PosList,PosBoard) :-
 position_board([X,Y], [X,Y1]) :-
   Y1 is 6 -Y.
 
-%valid_moves([Board, Next], [X,Y])
+valid_moves([Board, Next], Positions) :-
   % Check for the biggest stack
+  find_biggest_stacks(Board, Next, StackPositions, Max),
+  valid_movesAux([Board, Next], Max, StackPositions, Positions).
+
+valid_movesAux([Board, Next], 1,_, Positions) :-
+  % Every Position without a piece is valid 
+  findall([Row,Col],
+      (between(1, 5, Col),
+      between(1, 5, Row),
+      access_board(Board,[Row,Col], Elem),
+      Elem = '-'), Positions).
+
+valid_movesAux([Board, Next], 0,_, Positions) :-
+  % Every Position without a piece is valid 
+  findall([Row,Col],
+      (between(1, 5, Col),
+      between(1, 5, Row),
+      access_board(Board,[Row,Col], Elem),
+      Elem = '-'), Positions).
+
+valid_movesAux([Board, Next], _, StackPositions, Positions) :-
+    % Every Position without a piece is valid near stack Positions
+    findall([Row,Col],
+        (member([StackRow,StackCol], StackPositions),
+         (Row is StackRow+1, Col is StackCol+1;
+         Row is StackRow+1, Col is StackCol-1;
+         Row is StackRow-1, Col is StackCol+1;
+         Row is StackRow-1, Col is StackCol-1),
+         between(1, 5, Row),
+         between(1, 5, Col),
+         access_board(Board,[Row,Col], Elem),
+         Elem = '-'),
+        PositionsWithDuplicates),
+    % Remove duplicates from the list
+    sort(PositionsWithDuplicates, Positions).
+
+  
 
 find_biggest_stacks(Board, Next, Positions, Max) :-
     % Find all player (next) positions
@@ -79,8 +113,7 @@ find_biggest_stacks(Board, Next, Positions, Max) :-
     findall([Row,Col],
         (member((Row,Col,Num), AllPositions),
         Num = MaxNum),
-        PositionsL),
-    positions_board(PositionsL, Positions).
+        Positions).
     
 
 
