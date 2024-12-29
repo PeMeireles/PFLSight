@@ -83,10 +83,7 @@ valid_movesAux([Board, Next], _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
     findall([Row,Col],
         (member([StackRow,StackCol], StackPositions),
-         (Row is StackRow+1, Col is StackCol+1;
-         Row is StackRow+1, Col is StackCol-1;
-         Row is StackRow-1, Col is StackCol+1;
-         Row is StackRow-1, Col is StackCol-1),
+         adjacent(StackRow, StackCol, Row, Col),
          between(1, 5, Row),
          between(1, 5, Col),
          access_board(Board,[Row,Col], Elem),
@@ -115,6 +112,21 @@ find_biggest_stacks(Board, Next, Positions, Max) :-
         Num = MaxNum),
         Positions).
     
+
+% Check if its adjacent
+adjacent(Row, Col, NewRow, NewCol) :-
+    % Orthogonal moves (valid for all positions)
+    (NewRow is Row, NewCol is Col + 1);  % Right
+    (NewRow is Row, NewCol is Col - 1);  % Left
+    (NewRow is Row + 1, NewCol is Col);  % Down
+    (NewRow is Row - 1, NewCol is Col);  % Up
+    % Diagonal moves (only for intersection points)
+    ((Row + Col) mod 2 =:= 0,
+      (NewRow is Row + 1, NewCol is Col + 1;
+      NewRow is Row + 1, NewCol is Col - 1;
+      NewRow is Row - 1, NewCol is Col + 1;
+      NewRow is Row - 1, NewCol is Col - 1)).
+
 
 
 

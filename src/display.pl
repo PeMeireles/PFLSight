@@ -28,18 +28,25 @@ display_title(Next):-
   write('Turn').
 
 display_rows(Board) :-
-  display_rowsAux(Board, 5).
+  display_rowsAux(Board, 5, 0).
 
 
-display_rowsAux([Row | Rest], 1) :-
+display_rowsAux([Row | Rest], 1, _) :-
     display_row(Row), !.
 
-display_rowsAux([Row | Rest], N):-
+display_rowsAux([Row | Rest], N, 0):-
     N > 0,
     display_row(Row), nl,
     write('| \\ | / | \\ | / |'), nl,
     N1 is N - 1,
-    display_rowsAux(Rest, N1).
+    display_rowsAux(Rest, N1, 1).
+
+display_rowsAux([Row | Rest], N, 1):-
+    N > 0,
+    display_row(Row), nl,
+    write('| / | \\ | / | \\ |'), nl,
+    N1 is N - 1,
+    display_rowsAux(Rest, N1, 0).
 
 display_row([]).
 display_row([-| Rest]):-
