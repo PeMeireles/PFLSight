@@ -51,13 +51,6 @@ access_board(Board,[X,Y], Val) :-
   between(1, 5, Y1),
   nth1(Y1, Board, Row),
   nth1(X,Row,Val).
-  
-
-positions_board(PosList,PosBoard) :-
-    maplist(position_board, PosList, PosBoard).
-
-position_board([X,Y], [X,Y1]) :-
-  Y1 is 6 -Y.
 
 valid_moves([Board, Next], Positions) :-
   % Check for the biggest stack
@@ -66,7 +59,7 @@ valid_moves([Board, Next], Positions) :-
 
 valid_movesAux(Board, 1,_, Positions) :-
   % Every Position without a piece is valid 
-  findall([Row,Col],
+  findall([[0,0],[Row,Col]],
       (between(1, 5, Col),
       between(1, 5, Row),
       access_board(Board,[Row,Col], Elem),
@@ -74,7 +67,7 @@ valid_movesAux(Board, 1,_, Positions) :-
 
 valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
-  findall([Row,Col],
+  findall([[0,0],[Row,Col]],
       (between(1, 5, Col),
       between(1, 5, Row),
       access_board(Board,[Row,Col], Elem),
@@ -82,7 +75,7 @@ valid_movesAux(Board, 0,_, Positions) :-
 
 valid_movesAux(Board, _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
-    findall([Row,Col],
+    findall([[StackRow, StackCol],[Row,Col]],
         (member([StackRow,StackCol], StackPositions),
          adjacent(StackRow, StackCol, Row, Col),
          between(1, 5, Row),
@@ -226,15 +219,28 @@ switch_player(b, a).
 firstpiece(a, a1).
 firstpiece(b, b1).
 
-move([Board, Next], [X,Y],[NewBoard, NewNext]) :-
+move([Board, Next], [Origin,Target],[NewBoard, NewNext]) :-
   valid_moves([Board, Next], ValidPos),
-  member([X,Y], ValidPos),
-  in_sight([Board, Next], [X,Y], SightPos),
+  member([Origin,Target], ValidPos),
+  in_sight([Board, Next], Target, SightPos),
   add1topos(Board,SightPos, Board2),
   firstpiece(Next, Piece),
-  replace_on_board(Board2, [X,Y], Piece, NewBoard),
+  replace_on_board(Board2, Target, Piece, Board3),
+  change_start_piece(Board3, Origin, NewBoard),
   switch_player(Next, NewNext).
   
+
+change_start_piece(Board,[0,0], Board).
+change_start_piece(Board, [X,Y], FinalBoard) :-
+  access_board(Board, [X,Y], Val),
+
+  atom_chars(Val, [Player|NumC]),
+  number_chars(Num, NumC),
+  NewNum is Num - 2,
+  number_chars(NewNum, NewNumC),
+  atom_chars(NewVal, [Player|NewNumC]),
+
+  replace_on_board(Board, [X,Y], NewVal, FinalBoard).
 
 add1topos(Board, [], Board).
 add1topos(Board, [[X,Y]|Rest], FinalBoard) :-

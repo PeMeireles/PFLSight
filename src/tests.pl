@@ -33,9 +33,9 @@ boardaccess :-
 valid_moves3 :-
   testBoard(3,Testboard),
   valid_moves([Testboard, a], Positions),
-  Positions = [[1,3],[2,2]],
+  Positions = [[[2,3],[1,3]],[[2,3],[2,2]]],
   valid_moves([Testboard, b], Positions2),
-  Positions2 = [[1,1],[2,2],[3,1],[4,4],[4,5],[5,4]].
+  Positions2 = [[[2,1],[1,1]],[[2,1],[2,2]],[[2,1],[3,1]],[[5,5],[4,4]],[[5,5],[4,5]],[[5,5],[5,4]]].
 
 valid_moves2 :-
   testBoard(2,Testboard),
@@ -45,12 +45,16 @@ valid_moves2 :-
   Positions2 = [[3,2],[4,2]],
 
   valid_moves([Testboard, b], Positions3),
-  Positions3 = [[1,1],[2,1],[3,1],[4,1],[5,1],[1,2],[2,2]
-,[5,2],[1,3],[2,3],[4,3],[5,3],[1,4],[3,4]
-,[4,4],[5,4],[1,5],[2,5],[3,5],[4,5],[5,5]],
+  Positions3 = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]]
+,[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]]
+,[[0,0],[2,2]],[[0,0],[5,2]],[[0,0],[1,3]]
+,[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]]
+,[[0,0],[1,4]],[[0,0],[3,4]],[[0,0],[4,4]]
+,[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]]
+,[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]],
   valid_moves([Testboard, a], Positions4),
-  Positions4 = [[1,3],[1,4],[1,5],[2,3],[2,5],[3,4],[3,5]
-].
+  Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
+,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
 in_sight_col3 :-
   testBoard(3,Testboard),
@@ -129,8 +133,8 @@ move_tests :-
 
 move_valid_tests :-
   testBoard(2,Testboard),
-  move([Testboard,a], [3,4],[NewBoard, NewNext]),
-  NewBoard = [[-,-,-,-,-],[-,a3,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
+  move([Testboard,a], [[2,4],[3,4]],[NewBoard, NewNext]),
+NewBoard = [[-,-,-,-,-],[-,a1,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
   NewNext = b,
   display_rows(NewBoard),nl.
   %display_rows(NewBoard).
