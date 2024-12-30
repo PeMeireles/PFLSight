@@ -122,7 +122,7 @@ adjacent(Row, Col, NewRow, NewCol) :-
     NewCol is Col + SCol.
 
 steps_patterns(Row, Col, Steps) :-
-    (Row + Col) mod 2 =:= 0,
+    (Row + Col) mod 2 =:= 0, % Ordered by X asc then Y asc
     Steps = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].
 
 steps_patterns(Row, Col, Steps) :-
@@ -138,109 +138,35 @@ steps_patterns(Row, Col, Steps) :-
 % 1. It's in the same row, column, or diagonal (if position is on a diagonal intersection)
 % 2. It contains the next player's piece
 % 3. It's the first non-empty space encountered in that direction
-in_sight(Gamestate, [Row,Col], Locations):-
-    in_sight_row(Gamestate, [Row,Col], Rows),
-    in_sight_col(Gamestate, [Row, Col], Cols),
-    Intersection is ((Row + Col) mod 2),
-    in_sight_diagonal(Gamestate, [Row, Col], Diags, Intersection),
-    append(Rows,Cols,RowsCols),
-    append(RowsCols,Diags,Locations).
+in_sight(Gamestate, [Row,Col], Locations) :-
+  steps_patterns(Row, Col, Steps),
+  findall(Location,
+    (member(Step,Steps),
+    first_sight(Gamestate, [Row, Col], Step, Location)),
+    Locations).
 
-% in_sight_col(+GameState, +Position, -Locations)
-% Finds first non-empty positions from the same player in both column directions
+% Auxiliar function of in_sight
+% first_sight(+GameState, +Position, +Direction, -FoundPosition)
+% Finds the first non-empty position from the same player in the given direction, going step by step
 % GameState: [Board, Next], current board state and next player
 % Position: [Row,Col] starting position
-% Locations: List of [Row,Col] positions found in column
+% Direction: [DirectionX,DirectionY] direction to search
+% FoundPosition: [FRow,FCol] first position found with player's piece
 %
-% Searches in both directions from starting position:
-% - Right: increasing column numbers until first piece or board edge
-% - Left: decreasing column numbers until first piece or board edge
-% Uses cut (!) to ensure only first piece in each direction is found even if from different player
-in_sight_col([Board, Next], [Row,SCol], Locations) :-
-    RightCol is SCol + 1,
-    findall([Row,Col], 
-        (between(RightCol, 5, Col),
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-',!, 
-         atom_chars(Elem, [Next|_])),
-        RightLocs),
-    findall([Row,Col], 
-        (between(1, 5, SearchCol),
-         Col is SCol - SearchCol,
-         Col >= 1,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        LeftLocs),
-    append(LeftLocs,RightLocs,Locations).
-
-% Similar to in_sight_col
-in_sight_row([Board, Next], [SRow,Col], Locations) :-
-    RightRow is SRow + 1,
-    findall([Row,Col], 
-        (between(RightRow, 5, Row),
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-',!, % this cut makes it so it stops on first element
-         atom_chars(Elem, [Next|_])),
-        RightLocs),
-    findall([Row,Col], 
-        (between(1, 5, SearchRow),
-         Row is SRow - SearchRow,
-         Row >= 1,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        LeftLocs),
-    append(LeftLocs,RightLocs,Locations).
-
-
-% Similar to in_sight_col
-% [] when its not in an intersection
-in_sight_diagonal(_,_,[], 1).
-in_sight_diagonal([Board, Next], [SRow,SCol], Locations, 0) :-
-    % Down-right diagonal
-    findall([Row,Col], 
-        (between(1, 5, Step),
-         Row is SRow + Step,
-         Col is SCol + Step,
-         Row =< 5, Col =< 5,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        DRLocs),
-    % Down-left diagonal
-    findall([Row,Col], 
-        (between(1, 5, Step),
-         Row is SRow + Step,
-         Col is SCol - Step,
-         Row =< 5, Col >= 1,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        DLLocs),
-    % Up-right diagonal
-    findall([Row,Col], 
-        (between(1, 5, Step),
-         Row is SRow - Step,
-         Col is SCol + Step,
-         Row >= 1, Col =< 5,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        URLocs),
-    % Up-left diagonal
-    findall([Row,Col], 
-        (between(1, 5, Step),
-         Row is SRow - Step,
-         Col is SCol - Step,
-         Row >= 1, Col >= 1,
-         access_board(Board, [Row,Col], Elem),
-         Elem \= '-', !,
-         atom_chars(Elem, [Next|_])),
-        ULLocs),
-    append(DRLocs, DLLocs, DownLocs),
-    append(URLocs, ULLocs, UpLocs),
-    append(DownLocs, UpLocs, Locations).
+% Searches in the specified direction from starting position until:
+% - Finding first piece belonging to the current player
+% - Reaching board edge (1-5)
+% - Finding opponent's piece
+% Uses cut (!) to ensure only the first matching piece is returned
+first_sight([Board, Next], [Row, Col], [DirectionX, DirectionY], [FRow, FCol]) :-
+  between(1,5,Step),
+  FRow is Row + (DirectionX * Step),
+  FCol is Col + (DirectionY * Step),
+  between(1,5,FRow),
+  between(1,5,FCol),
+  access_board(Board, [FRow, FCol], Piece),
+  Piece \= '-',
+  atom_chars(Piece, [Next|_]), !.
 
 switch_player(a, b).
 switch_player(b, a).
