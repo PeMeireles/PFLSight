@@ -7,11 +7,12 @@ run :-
   % write('display_tests done'),nl,
   valid_moves3,
   write('valid_moves3 done'),nl,
-
+  
   valid_moves2,
   write('valid_moves2 done'),nl,
 
   in_sight_test,
+  move_tests,
   !.
 
 
@@ -121,6 +122,18 @@ test_intersections_sight :-
     in_sight([Board, a], [3,2], Loc2),
     Loc2 = [[3,1],[3,3]].
 
+move_tests :-
+  move_valid_tests,
+  write('Move tests passed'),nl.
+  %move_invalid_tests,
+
+move_valid_tests :-
+  testBoard(2,Testboard),
+  move([Testboard,a], [3,4],[NewBoard, NewNext]),
+  NewBoard = [[-,-,-,-,-],[-,a3,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
+  NewNext = b,
+  display_rows(NewBoard),nl.
+  %display_rows(NewBoard).
 
 
 display_tests :-
@@ -206,5 +219,4 @@ testBoard(s4,[[a,-,a,-,a],
               [a,-,a,-,a],
               [-,-,-,-,-],
               [a,-,a,-,a]]).
-
 

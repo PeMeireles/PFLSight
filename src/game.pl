@@ -175,7 +175,6 @@ in_sight_row([Board, Next], [SRow,Col], Locations) :-
 
 
 in_sight_diagonal(_,_,[], 1).
-
 in_sight_diagonal([Board, Next], [SRow,SCol], Locations, 0) :-
     % Down-right diagonal
     findall([Row,Col], 
@@ -221,6 +220,48 @@ in_sight_diagonal([Board, Next], [SRow,SCol], Locations, 0) :-
     append(URLocs, ULLocs, UpLocs),
     append(DownLocs, UpLocs, Locations).
 
+switch_player(a, b).
+switch_player(b, a).
 
+firstpiece(a, a1).
+firstpiece(b, b1).
+
+move([Board, Next], [X,Y],[NewBoard, NewNext]) :-
+  valid_moves([Board, Next], ValidPos),
+  member([X,Y], ValidPos),
+  in_sight([Board, Next], [X,Y], SightPos),
+  add1topos(Board,SightPos, Board2),
+  firstpiece(Next, Piece),
+  replace_on_board(Board2, [X,Y], Piece, NewBoard),
+  switch_player(Next, NewNext).
   
 
+add1topos(Board, [], Board).
+add1topos(Board, [[X,Y]|Rest], FinalBoard) :-
+    access_board(Board, [X,Y], Val),
+  % Solução pouco elegante mas foi a forma que encontrei de converter
+    atom_chars(Val, [Player|NumC]),
+    number_chars(Num, NumC),
+    NewNum is Num + 1,
+    number_chars(NewNum, NewNumC),
+    atom_chars(NewVal, [Player|NewNumC]),
+
+    replace_on_board(Board, [X,Y], NewVal, TempBoard),
+    add1topos(TempBoard, Rest, FinalBoard).
+  
+
+  
+replace_on_board(Board, [X,Y], Val, FinalBoard) :-
+  Y1 is 6-Y,
+  nth1(Y1, Board, OldRow),
+  replace_nth(OldRow, Val, NewRow, X),
+  replace_nth(Board, NewRow, FinalBoard, Y1).
+
+% Baseado no list_slice / list_del p3
+replace_nth(Row1, NewVal, NewRow, X) :-
+  X1 is X -1,
+  length(Pref,X1),
+  append(Pref, [_ | Suff],Row1),
+  append(Pref, [NewVal | Suff], NewRow).
+  
+  
