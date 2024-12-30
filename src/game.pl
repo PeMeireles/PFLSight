@@ -45,6 +45,16 @@ handle_choice(3) :-
   write('2 - Smart'), nl,
   read(Choice2).
 
+% access_board(+Board, +Position, -Value)
+% Accesses value at given position on game board
+% Board: List of lists representing game state
+% Position: [X,Y] where:
+%   - X is column (1-5)
+%   - Y is row (1-5) from bottom to top
+% Value: Content at position ('-' for empty, or 'PlayerNumber' Ex: 'a1')
+%
+% Note: Internal board representation is top-to-bottom (Y1 = 6-Y),
+% while game logic uses bottom-to-top coordinates
 access_board(Board,[X,Y], Val) :-
   Y1 is 6 - Y,
   board_position(X,Y),
@@ -58,24 +68,32 @@ board_position(Row, Col) :-
     between(1, 5, Row),
     between(1, 5, Col).
 
+% valid_moves(+GameState, -ValidMoves)
+% Determines all valid moves for current player
+% GameState: [Board, Next] representing current board and player
+% ValidMoves: List of [[StartRow,StartCol], [TargetRow,TargetCol]] valid moves
 valid_moves([Board, Next], Positions) :-
   % Check for the biggest stack
   find_biggest_stacks(Board, Next, StackPositions, Max),
   valid_movesAux(Board, Max, StackPositions, Positions).
 
-valid_movesAux(Board, 1,_, Positions) :-
-  % Every Position without a piece is valid 
-  findall([[0,0],[Row,Col]],
-      (board_position(Col,Row),
-      access_board(Board,[Row,Col], Elem),
-      Elem = '-'), Positions).
-
+% valid_movesAux(+Board, +MaxValue, +StackPositions, -ValidMoves)
+% Determines valid moves based on stack value and positions
+% Board: Current game board state
+% MaxValue: Value of the tallest stack for current player
+% StackPositions: List of positions with maximum value stacks
+% ValidMoves: List of [[StartRow,StartCol], [TargetRow,TargetCol]]
+%
+% Cases:
+% - Height 0 or 1: Moves from [0,0] to any empty position
+% - Height > 1: Moves from stack positions to adjacent empty positions
 valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
-  findall([[0,0],[Row,Col]],
-      (board_position(Col,Row),
-      access_board(Board,[Row,Col], Elem),
-      Elem = '-'), Positions).
+  empty_moves(Board, Positions).
+
+valid_movesAux(Board, 1,_, Positions) :-
+  % Every Position without a piece is valid 
+  empty_moves(Board, Positions).
 
 valid_movesAux(Board, _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
@@ -89,6 +107,14 @@ valid_movesAux(Board, _, StackPositions, Positions) :-
     % Remove duplicates from the list
     sort(PositionsWithDuplicates, Positions).
 
+% empty_moves(+Board, -Moves)
+% Finds all possible moves from outside of Board aka new piece [0,0]
+% to empty board positions
+empty_moves(Board, Spaces) :-
+  findall([[0,0],[Row,Col]],
+      (board_position(Col,Row),
+      access_board(Board,[Row,Col], Elem),
+      Elem = '-'), Positions).
   
 % find_biggest_stacks(+Board, +Next, -Positions, -Max)
 % Finds positions of pieces with highest stack value for given player
@@ -228,7 +254,7 @@ move([Board, Next], [Origin,Target],[NewBoard, NewNext]) :-
 % PosList: List of [X,Y] positions to increment
 % FinalBoard: Resulting board after all increments
 %
-% Each cell in format 'PlayerNumber'
+% Each spot in format 'PlayerNumber'
 add1topos(Board, [], Board).
 add1topos(Board, [[X,Y]|Rest], FinalBoard) :-
     access_board(Board, [X,Y], Val),
