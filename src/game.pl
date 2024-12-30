@@ -47,10 +47,16 @@ handle_choice(3) :-
 
 access_board(Board,[X,Y], Val) :-
   Y1 is 6 - Y,
-  between(1, 5, X),
-  between(1, 5, Y1),
+  board_position(X,Y),
   nth1(Y1, Board, Row),
   nth1(X,Row,Val).
+
+% board_position(-Row, -Col)
+% Generates valid board coordinates
+% Succeeds for all positions within 5x5 board
+board_position(Row, Col) :-
+    between(1, 5, Row),
+    between(1, 5, Col).
 
 valid_moves([Board, Next], Positions) :-
   % Check for the biggest stack
@@ -60,16 +66,14 @@ valid_moves([Board, Next], Positions) :-
 valid_movesAux(Board, 1,_, Positions) :-
   % Every Position without a piece is valid 
   findall([[0,0],[Row,Col]],
-      (between(1, 5, Col),
-      between(1, 5, Row),
+      (board_position(Col,Row),
       access_board(Board,[Row,Col], Elem),
       Elem = '-'), Positions).
 
 valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
   findall([[0,0],[Row,Col]],
-      (between(1, 5, Col),
-      between(1, 5, Row),
+      (board_position(Col,Row),
       access_board(Board,[Row,Col], Elem),
       Elem = '-'), Positions).
 
@@ -78,8 +82,7 @@ valid_movesAux(Board, _, StackPositions, Positions) :-
     findall([[StackRow, StackCol],[Row,Col]],
         (member([StackRow,StackCol], StackPositions),
          adjacent(StackRow, StackCol, Row, Col),
-         between(1, 5, Row),
-         between(1, 5, Col),
+         board_position(Row,Col),
          access_board(Board,[Row,Col], Elem),
          Elem = '-'),
         PositionsWithDuplicates),
@@ -87,25 +90,51 @@ valid_movesAux(Board, _, StackPositions, Positions) :-
     sort(PositionsWithDuplicates, Positions).
 
   
-
+% find_biggest_stacks(+Board, +Next, -Positions, -Max)
+% Finds positions of pieces with highest stack value for given player
+% Board: Current game board state
+% Next: Player identifier ('a' or 'b')
+% Positions: List of [Row,Col] positions with maximum stack value
+% Max: The maximum stack value found
 find_biggest_stacks(Board, Next, Positions, Max) :-
-    % Find all player (next) positions
-    findall((Row,Col,Val),
-        (between(1, 5, Col),
-         between(1, 5, Row),
-        access_board(Board,[Row,Col], Elem),
-        Elem \= '-',
-        atom_chars(Elem, [Next|NumC]),
-        number_chars(Val,NumC)),
-        AllPositions),
-    findall(Val, member((_, _, Val), AllPositions), Values),
-    max_member(MaxNum, Values),
-    Max = MaxNum,
-    findall([Row,Col],
-        (member((Row,Col,Num), AllPositions),
-        Num = MaxNum),
+    player_pieces(Board, Next, AllPositions),
+    maximum_value(AllPositions, Max),
+    positions_with_value(AllPositions, Max, Positions).
+
+% player_pieces(+Board, +Next, -Positions)
+% Collects all positions and their values for a given player
+% Returns list of (Row, Col, Value) tuples for all player's pieces
+player_pieces(Board, Next, Positions) :-
+    findall((Row, Col, Value),
+        (board_position(Row, Col),
+         piece_value(Board, [Row, Col], Next, Value)),
         Positions).
-    
+
+% piece_value(+Board, +Position, +Player, -Value)
+% Extracts value of a player's piece
+% Position: [Row, Col] coordinates
+% Value: Numeric value at position
+piece_value(Board, [Row, Col], Player, Value) :-
+    access_board(Board, [Row, Col], Piece),
+    Piece \= '-',
+    atom_chars(Piece, [Player|NumChars]),
+    number_chars(Value, NumChars).
+
+% maximum_value(+Positions, -Max)
+% Finds the highest stack value among all positions
+% Positions: List of (Row, Col, Value) tuples
+% Max: Highest value found
+maximum_value(Positions, Max) :-
+    findall(Value, member((_, _, Value), Positions), Values),
+    max_member(Max, Values).
+
+% positions_with_value(+AllPositions, +Value, -Positions)
+% Finds all positions that have a specific value
+% AllPositions: List of (Row, Col, Value) tuples
+% Value: Target value to match
+% Positions: List of [Row, Col] positions with matching value
+positions_with_value(AllPositions, Value, Positions) :-
+    findall([Row, Col],(member((Row, Col, Value), AllPositions)), Positions).
 
 % adjacent(+Row, +Col, -NewRow, -NewCol)
 % See if its a valid adjacent positions on the game board
@@ -122,7 +151,7 @@ adjacent(Row, Col, NewRow, NewCol) :-
     NewCol is Col + SCol.
 
 steps_patterns(Row, Col, Steps) :-
-    (Row + Col) mod 2 =:= 0, % Ordered by X asc then Y asc
+    (Row + Col) mod 2 =:= 0, 
     Steps = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].
 
 steps_patterns(Row, Col, Steps) :-
@@ -162,8 +191,7 @@ first_sight([Board, Next], [Row, Col], [DirectionX, DirectionY], [FRow, FCol]) :
   between(1,5,Step),
   FRow is Row + (DirectionX * Step),
   FCol is Col + (DirectionY * Step),
-  between(1,5,FRow),
-  between(1,5,FCol),
+  board_position(FRow,FCol),
   access_board(Board, [FRow, FCol], Piece),
   Piece \= '-',
   atom_chars(Piece, [Next|_]), !.
@@ -194,10 +222,6 @@ move([Board, Next], [Origin,Target],[NewBoard, NewNext]) :-
   change_start_piece(Board3, Origin, NewBoard),
   switch_player(Next, NewNext).
   
-
-
-
-
 % add1topos(+Board, +PosList, -FinalBoard)
 % Increments the numeric part of cell values at given positions
 % Board: Current game board state
@@ -231,8 +255,6 @@ change_start_piece(Board, [X,Y], FinalBoard) :-
   atom_chars(NewVal, [Player|NewNumC]),
 
   replace_on_board(Board, [X,Y], NewVal, FinalBoard).
-
-
 
 % replace_on_board(+Board, +Position, +Value, -NewBoard)
 % Replaces a value at specified position in the game board
