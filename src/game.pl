@@ -124,8 +124,11 @@ empty_moves(Board, Spaces) :-
 % Max: The maximum stack value found
 find_biggest_stacks(Board, Next, Positions, Max) :-
     player_pieces(Board, Next, AllPositions),
-    maximum_value(AllPositions, Max),
-    positions_with_value(AllPositions, Max, Positions).
+    (AllPositions = [] -> Max = 0, Positions = []
+        ;
+       maximum_value(AllPositions, Max),
+       positions_with_value(AllPositions, Max, Positions)
+     ).
 
 % player_pieces(+Board, +Next, -Positions)
 % Collects all positions and their values for a given player
@@ -309,4 +312,45 @@ replace_nth(Row1, NewVal, NewRow, X) :-
   append(Pref, [_ | Suff],Row1),
   append(Pref, [NewVal | Suff], NewRow).
   
-  
+% value(+GameState, +Player, -Value)
+% Receives the current game state and returns a value measuring how good/bad the current game state is to the given Player, by calculating different metrics
+% PlayerPieceCount: Number of pieces the player has on the board
+% OpponentPieceCount: Number of pieces the opponent has on the board
+% Amountvalue: Value of a current game state according to amount of pieces
+% PlayerStackValue: Overall value of stacks (overall "powerfulness" of stacks) the player has on the board
+% OpponentStackValue: Overall value of stacks (overall "powerfulness" of stacks) opponent has on the board
+% StackValue: Value of a current game state according to overall value of stacks
+% PlayerMobility: Number of available valid moves the player has on the board
+% OpponentMobility: Number of available valid moves the opponent has on the board
+% MobilityValue: Value of a current game state according to amount of available valid moves
+% Value: Overall value of a current game state (using the previously calculated values, with different levels of "importance")
+
+value([Board, Next], Player, Value) :-
+    player_pieces(Board, Player, PlayerPieces),
+    length(PlayerPieces, PlayerPieceCount),
+    switch_player(Player, Opponent),
+    player_pieces(Board, Opponent, OpponentPieces),
+    length(OpponentPieces, OpponentPieceCount),
+    AmountValue is PlayerPieceCount - OpponentPieceCount,
+    
+    stack_value(Board, Player, PlayerStackValue),
+    stack_value(Board, Opponent, OpponentStackValue),
+    StackValue is PlayerStackValue - OpponentStackValue,
+
+   valid_moves([Board, Player], PlayerMoves),
+   length(PlayerMoves, PlayerMobility),
+    valid_moves([Board, Opponent], OpponentMoves),
+   length(OpponentMoves, OpponentMobility),
+   MobilityValue is PlayerMobility - OpponentMobility,
+
+    Value is (AmountValue * 1) + (StackValue * 2) + (MobilityValue * 2).
+
+% stack_value(+Board, +Player, -Value)
+% Sums the value of all the stacks of a player by iterating each player piece and getting its value
+% Values: List that stores all the values of all the stacks of a player
+% Value: Sum of all the elements of the list values
+% This gives us the overall "powerfulness" of a players stacks
+stack_value(Board, Player, Value):-
+    player_pieces(Board, Player, Positions),
+    findall(StackValue, (member((_,_,StackValue), Positions)), Values),
+    sumlist(Values, Value).

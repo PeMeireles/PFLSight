@@ -1,10 +1,11 @@
 :- consult(game).
 :- consult(movetests).
+:- consult(valuetests).
 run :-
   boardaccess,
   write('Board Access done'),nl,
-  % display_tests,
-  % write('display_tests done'),nl,
+   display_tests,
+   write('display_tests done'),nl,
   valid_moves3,
   write('valid_moves3 done'),nl,
   
@@ -13,6 +14,7 @@ run :-
 
   in_sight_test,
   move_tests,
+  value_tests,
   !.
 
 
@@ -117,6 +119,18 @@ testBoard(4, [[a4,-,a2,-,a4],
               [-,-,-,-,-],
               [a4,a4,-,a4,a4],
               [a4,-,-,-,a4]]).
+
+testBoard(5, [[-,-,-,-,-], 
+              [-,-,-,-,-],
+              [-,-,a1,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-]]).
+
+testBoard(6,[[a3,-,-,-,-], 
+              [-,-,a2,-,-],
+              [a3,-,-,-,b3],
+              [-,-,b2,-,-],
+              [-,-,-,-,b2]]).
 
 
 % Removed numbers since those boards are exclusive to in_sight
