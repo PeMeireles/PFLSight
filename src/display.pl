@@ -103,9 +103,10 @@ display_target_menu :-
 
 display_title(Next):- 
   clear_screen, 
-  write('Its '),
+  write('It\'s '),
   write(Next),
-  write('Turn').
+  write('\'s'),
+  write(' Turn').
 
 
 display_winner(Winner).
