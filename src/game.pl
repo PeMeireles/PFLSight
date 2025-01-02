@@ -59,6 +59,7 @@ game_loop(Gamestate) :-
     repeat,
         valid_moves(Gamestate, Moves),
         display_game(Gamestate),
+        write(Gamestate),nl,
         (handle_move(Gamestate, Moves, NewState) ->
             handle_game_state(NewState)
         ;   
@@ -66,14 +67,14 @@ game_loop(Gamestate) :-
             game_loop(Gamestate)
         ).
 
-handle_game_state(State) :-
-    game_over(State, Winner),
+handle_game_state([Board, Next, P1, P2]) :-
+    game_over([Board, Next, _, _], Winner),
     (Winner \= 0 ->
         display_rows(Board),
 
         display_winner(Winner), !
     ;   
-        game_loop(State)
+        game_loop([Board, Next, P1, P2])
     ).
 
 handle_invalid_move :-
@@ -118,7 +119,7 @@ validate_valid_stack(Origin, [[Origin, _] | _ ]) :-!.
 validate_valid_stack(Origin, [_ | T]) :-
     validate_valid_stack(Origin, T).
 
-initial_state((Size, _, _), [Board, Next]) :-
+initial_state((Size, P1, P2), [Board, Next, P1, P2]) :-
   board(Size,Board),
   Next = a. % Might do first player random
 
@@ -147,9 +148,9 @@ board_position(Row, Col) :-
 
 % valid_moves(+GameState, -ValidMoves)
 % Determines all valid moves for current player
-% GameState: [Board, Next] representing current board and player
+% GameState: [Board, Next, _, _] representing current board and player
 % ValidMoves: List of [[StartRow,StartCol], [TargetRow,TargetCol]] valid moves
-valid_moves([Board, Next], Positions) :-
+valid_moves([Board, Next, _, _], Positions) :-
   % Check for the biggest stack
   find_biggest_stacks(Board, Next, StackPositions, Max),
   valid_movesAux(Board, Max, StackPositions, Positions).
@@ -263,7 +264,7 @@ steps_patterns(Row, Col, Steps) :-
 
 % in_sight(+GameState, +Position, -Locations)
 % Finds all positions that are in sight of the given position
-% GameState: [Board, Next], current board state and next player
+% GameState: [Board, Next, _, _], current board state and next player
 % Position: [Row,Col] coordinates to check sight from
 % Locations: List of [Row,Col] positions that are in sight
 %
@@ -281,7 +282,7 @@ in_sight(Gamestate, [Row,Col], Locations) :-
 % Auxiliar function of in_sight
 % first_sight(+GameState, +Position, +Direction, -FoundPosition)
 % Finds the first non-empty position from the same player in the given direction, going step by step
-% GameState: [Board, Next], current board state and next player
+% GameState: [Board, Next, _, _], current board state and next player
 % Position: [Row,Col] starting position
 % Direction: [DirectionX,DirectionY] direction to search
 % FoundPosition: [FRow,FCol] first position found with player's piece
@@ -291,7 +292,7 @@ in_sight(Gamestate, [Row,Col], Locations) :-
 % - Reaching board edge (1-5)
 % - Finding opponent's piece
 % Uses cut (!) to ensure only the first matching piece is returned
-first_sight([Board, Next], [Row, Col], [DirectionX, DirectionY], [FRow, FCol]) :-
+first_sight([Board, Next, _, _], [Row, Col], [DirectionX, DirectionY], [FRow, FCol]) :-
   between(1,5,Step),
   FRow is Row + (DirectionX * Step),
   FCol is Col + (DirectionY * Step),
@@ -308,7 +309,7 @@ firstpiece(b, b1).
 
 % move(+GameState, +Move, -NewGameState)
 % Executes a game move and updates the game state
-% GameState: [Board, Next], where Board is current board and Next is next player (the one taking action)
+% GameState: [Board, Next, _, _], where Board is current board and Next is next player (the one taking action)
 % Move: [Origin,Target] representing start and end positions of the move
 % NewGameState: [NewBoard, NewNext] resulting state after move execution
 %
@@ -316,10 +317,10 @@ firstpiece(b, b1).
 % 1. Move is valid according to game rules
 % 2. Target position is within sight
 % 3. All board updates are successful
-move([Board, Next], [Origin,Target],[NewBoard, NewNext]) :-
-  valid_moves([Board, Next], ValidPos),
+move([Board, Next, P1, P2], [Origin,Target],[NewBoard, NewNext, P1, P2]) :-
+  valid_moves([Board, Next, P1, P2], ValidPos),
   member([Origin,Target], ValidPos),
-  in_sight([Board, Next], Target, SightPos),
+  in_sight([Board, Next, P1, P2], Target, SightPos),
   add1topos(Board,SightPos, Board2),
   firstpiece(Next, Piece),
   replace_on_board(Board2, Target, Piece, Board3),
@@ -327,9 +328,9 @@ move([Board, Next], [Origin,Target],[NewBoard, NewNext]) :-
   switch_player(Next, NewNext).
 
 % same as move but validPos is pre calculated
-move_pre_val([Board, Next], [Origin,Target],[NewBoard, NewNext], ValidPos) :-
+move_pre_val([Board, Next, P1, P2], [Origin,Target],[NewBoard, NewNext, P1, P2], ValidPos) :-
   member([Origin,Target], ValidPos),
-  in_sight([Board, Next], Target, SightPos),
+  in_sight([Board, Next, _, _], Target, SightPos),
   add1topos(Board,SightPos, Board2),
   firstpiece(Next, Piece),
   replace_on_board(Board2, Target, Piece, Board3),
@@ -411,7 +412,7 @@ replace_nth(Row1, NewVal, NewRow, X) :-
 % Value: Overall value of a current game state (using the previously calculated values, with different levels of "importance")
 
 
-value([Board, Next], Player, Value) :-
+value([Board, Next, _, _], Player, Value) :-
     player_pieces(Board, Player, PlayerPieces),
     length(PlayerPieces, PlayerPieceCount),
     switch_player(Player, Opponent),
@@ -423,9 +424,9 @@ value([Board, Next], Player, Value) :-
     stack_value(Board, Opponent, OpponentStackValue),
     StackValue is PlayerStackValue - OpponentStackValue,
 
-    valid_moves([Board, Player], PlayerMoves),
+    valid_moves([Board, Player, _, _], PlayerMoves),
     length(PlayerMoves, PlayerMobility),
-    valid_moves([Board, Opponent], OpponentMoves),
+    valid_moves([Board, Opponent,_,_], OpponentMoves),
     length(OpponentMoves, OpponentMobility),
     MobilityValue is PlayerMobility - OpponentMobility,
 
@@ -443,11 +444,11 @@ stack_value(Board, Player, Value):-
 
 % game_over(+GameState, -Winner)
 % Determines if game is over and who won
-% GameState: [Board, Next] current board and player to move
+% GameState: [Board, Next, _, _] current board and player to move
 % Winner: Player who won the game
 % Game is over when current player has no valid moves, losing the game
-game_over([Board, Next], Winner) :-
-    valid_moves([Board, Next], Positions),
+game_over([Board, Next, _, _], Winner) :-
+    valid_moves([Board, Next, _, _], Positions),
     game_overAux(Next, Positions, Winner).
 
 game_overAux(Next, [], Winner):-

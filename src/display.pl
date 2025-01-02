@@ -83,7 +83,7 @@ display_stack_drop :-
   write('Since you have one or more stacks, please select one of them so you can move the piece on top'),nl.
 
  % --------------------------- 
-display_game([Board,Next]) :-
+display_game([Board,Next, _,_]) :-
   display_title(Next),nl,
   display_rows(Board),nl.
 
@@ -99,7 +99,7 @@ display_target_menu :-
 
 
 display_title(Next):- 
-  clear_screen, 
+%clear_screen, 
   write('Its '),
   write(Next),
   write(' Turn').

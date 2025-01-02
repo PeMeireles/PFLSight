@@ -40,14 +40,14 @@ boardaccess :-
 
 valid_moves1 :- %No stacks no b pieces
   testBoard(5,Testboard),
-  valid_moves([Testboard,b], Positions),
+  valid_moves([Testboard,b,0,0], Positions),
   Positions = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]],[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]],[[0,0],[2,2]],[[0,0],[3,2]],[[0,0],[4,2]],[[0,0],[5,2]],[[0,0],[1,3]],[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]],[[0,0],[1,4]],[[0,0],[2,4]],[[0,0],[3,4]],[[0,0],[4,4]],[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]],[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]].
 
 valid_moves3 :-
   testBoard(3,Testboard),
-  valid_moves([Testboard, a], Positions),
+  valid_moves([Testboard, a,0,0], Positions),
   Positions = [[[2,3],[1,3]],[[2,3],[2,2]]],
-  valid_moves([Testboard, b], Positions2),
+  valid_moves([Testboard, b,0,0], Positions2),
   Positions2 = [[[2,1],[1,1]],[[2,1],[2,2]],[[2,1],[3,1]],[[5,5],[4,4]],[[5,5],[4,5]],[[5,5],[5,4]]].
 
 valid_moves2 :-
@@ -57,7 +57,7 @@ valid_moves2 :-
   find_biggest_stacks(Testboard, b, Positions2, _),
   Positions2 = [[3,2],[4,2]],
 
-  valid_moves([Testboard, b], Positions3),
+  valid_moves([Testboard, b,0,0], Positions3),
   Positions3 = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]]
 ,[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]]
 ,[[0,0],[2,2]],[[0,0],[5,2]],[[0,0],[1,3]]
@@ -65,26 +65,26 @@ valid_moves2 :-
 ,[[0,0],[1,4]],[[0,0],[3,4]],[[0,0],[4,4]]
 ,[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]]
 ,[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]],
-  valid_moves([Testboard, a], Positions4),
+  valid_moves([Testboard, a,0,0], Positions4),
   Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
 ,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
 % Check no winner
 game_over_test1 :-
     testBoard(g0, TestBoard),
-    game_over([TestBoard, a], 0).
+    game_over([TestBoard, a,0,0], 0).
 
 game_over_test2 :-
     testBoard(g1, TestBoard),
-    game_over([TestBoard, a], b).
+    game_over([TestBoard, a,0,0], b).
 
 game_over_test3 :-
     testBoard(g2, TestBoard),
-    game_over([TestBoard, b], 0).
+    game_over([TestBoard, b,0,0], 0).
 
 game_over_test4 :-
     testBoard(g3, TestBoard),
-    game_over([TestBoard, a], 0).
+    game_over([TestBoard, a,0,0], 0).
 
 display_tests :-
   fontTest,
