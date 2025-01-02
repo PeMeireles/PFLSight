@@ -4,8 +4,8 @@
 run :-
   boardaccess,
   write('Board Access done'),nl,
-   display_tests,
-   write('display_tests done'),nl,
+  display_tests,
+  write('display_tests done'),nl,
   valid_moves3,
   write('valid_moves3 done'),nl,
   
@@ -76,7 +76,9 @@ game_over_test2 :-
 display_tests :-
   fontTest,
   testBoard(2,Testboard),
-  display_rows(Testboard).
+  display_rows(Testboard),nl,
+  board(5,Testboard2),
+  display_rows(Testboard2),nl.
 
 
 fontTest :-

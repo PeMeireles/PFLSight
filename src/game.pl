@@ -14,36 +14,36 @@
 :- use_module(library(lists)).
 
 play :- 
-  board(5,Board),
-  display_rows(Board),nl,
-  display_menu,
+    repeat,
+    clear_screen,
+    display_start_menu,
+    read(Choice),
+    validate_choice(Choice, [1,2,3,4]),
+    handle_start_choice(Choice, Options), !.
+  %start_game(Options), !.
+
+
+handle_start_choice(1, [5, 0, 0]) :- !.
+
+handle_start_choice(2, [5, 0, Choice]) :-
+  repeat,
+  display_menu(computer),
   read(Choice),
-  handle_choice(Choice).
+  validate_choice(Choice, [1,2]),!.
 
-display_menu :-
-  write('please choose what mode you want to play:'),
-  write('1 - player vs player'),nl,
-  write('2 - player vs Computer'),nl,
-  write('3 - Computer vs Computer'),nl.
-
-
-handle_choice(1).
-
-handle_choice(2) :-
-  write('Would you like the Computer to be:'),nl,
-  write('1 - Random'), nl,
-  write('2 - Smart'), nl,
-  read(Choice).
-
-handle_choice(3) :-
-  write('Would you like the first Computer to be:'),nl,
-  write('1 - Random'), nl,
-  write('2 - Smart'), nl,
+handle_start_choice(3, [5,Choice1, Choice2]) :-
+  repeat,
+  display_menu(computer),
   read(Choice1),
-  write('Would you like the second Computer to be:'),nl,
-  write('1 - Random'), nl,
-  write('2 - Smart'), nl,
-  read(Choice2).
+  validate_choice(Choice1, [1,2]),
+  write('And for the second one.'),nl,
+  display_menu(computer),
+  read(Choice2),
+  validate_choice(Choice2, [1,2]), !.
+
+handle_start_choice(4, _) :-
+  write('If this character is a 4 stack white piece its working: P'), nl,
+  wait_for_enter, !.
 
 % access_board(+Board, +Position, -Value)
 % Accesses value at given position on game board
@@ -364,3 +364,4 @@ stack_value(Board, Player, Value):-
 game_over([Board, Next], Winner) :-
     valid_moves([Board, Next], []),
     switch_player(Next, Winner).
+
