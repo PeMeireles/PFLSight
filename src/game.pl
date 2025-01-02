@@ -85,9 +85,17 @@ handle_invalid_move :-
 
 % handle_move(+GameState, +ValidMoves, -NewState)
 % Handles move input based on game state
-handle_move(Gamestate, Moves, NewState) :-
+handle_move([Board, a, 0, P2], Moves, NewState) :-
     move_type(Moves, Type),
-    execute_move(Type, Gamestate, Moves, NewState).
+    execute_move(Type, [Board, a, 0, P2], Moves, NewState).
+
+handle_move([Board, b, P1, 0], Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, [Board, b, P1, 0], Moves, NewState).
+    
+%handle_move([Board, Next, P1, P2], Moves, NewState) :-
+    %choose_move
+    
 
 % handle_new_piece(+GameState, +ValidMoves, -NewState)
 % Handles moves when no stacks present
