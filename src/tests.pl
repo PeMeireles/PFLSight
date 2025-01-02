@@ -17,6 +17,8 @@ run :-
   value_tests,
   game_over_test1,
   game_over_test2,
+  game_over_test3,
+  game_over_test4,
   write('game_over_test done'),nl,
   
   !.
@@ -35,6 +37,11 @@ boardaccess :-
   Val = 'b1',
   access_board(Testboard, [2,4],Val2),
   Val2 = 'a2'.
+
+valid_moves1 :- %No stacks no b pieces
+  testBoard(5,Testboard),
+  valid_moves([Testboard,b], Positions),
+  Positions = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]],[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]],[[0,0],[2,2]],[[0,0],[3,2]],[[0,0],[4,2]],[[0,0],[5,2]],[[0,0],[1,3]],[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]],[[0,0],[1,4]],[[0,0],[2,4]],[[0,0],[3,4]],[[0,0],[4,4]],[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]],[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]].
 
 valid_moves3 :-
   testBoard(3,Testboard),
@@ -65,13 +72,19 @@ valid_moves2 :-
 % Check no winner
 game_over_test1 :-
     testBoard(g0, TestBoard),
-    \+ game_over([TestBoard, a], Winner).
+    game_over([TestBoard, a], 0).
 
 game_over_test2 :-
     testBoard(g1, TestBoard),
-    game_over([TestBoard, a], Winner),
-    Winner = b.
-    
+    game_over([TestBoard, a], b).
+
+game_over_test3 :-
+    testBoard(g2, TestBoard),
+    game_over([TestBoard, b], 0).
+
+game_over_test4 :-
+    testBoard(g3, TestBoard),
+    game_over([TestBoard, a], 0).
 
 display_tests :-
   fontTest,
@@ -184,3 +197,14 @@ testBoard(g1,[[a2,b1,-,-,-],
               [-,-,-,-,-],
               [-,-,-,-,-]]).
 
+testBoard(g2,[[a1,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-]]).
+
+testBoard(g3,[[b1,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-]]).
