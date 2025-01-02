@@ -12,6 +12,7 @@
 :- consult(display).
 :- use_module(library(between)).
 :- use_module(library(lists)).
+:- use_module(library(random)).
 
 play :- 
     repeat,
@@ -48,8 +49,8 @@ handle_start_choice(4, _) :-
 % start_game(+Config)
 % Starts game with given configuration
 % Config: (Size, P1, P2) for board size and player types
-start_game((Size, P1, P2)) :-
-    initial_state((Size, P1, P2), GameState),
+start_game(Options) :-
+    initial_state(Options, GameState),
     game_loop(GameState).
 
 % game_loop(+GameState)
@@ -89,16 +90,16 @@ handle_move(Gamestate, Moves, NewState) :-
 
 % handle_new_piece(+GameState, +ValidMoves, -NewState)
 % Handles moves when no stacks present
-execute_move(new_piece, [Board, Next], Moves, NewState) :-
+execute_move(new_piece, Gamestate, Moves, NewState) :-
     display_new_piece,
     read_player_input(Pos1, Moves),
     validate_board_choice(Pos1, Size),
-    move_pre_val([Board, Next], [[0,0], Pos1], NewState, Moves).
+    move_pre_val(Gamestate, [[0,0], Pos1], NewState, Moves).
 
 
 % handle_regular_move(+GameState, +ValidMoves, -NewState)
 % Handles moves when stacks are present
-execute_move(stack, [Board, Next], Moves, NewState) :-
+execute_move(stack, Gamestate, Moves, NewState) :-
     display_stack_drop,
     read_player_input(Pos1, Moves),
     validate_board_choice(Pos1, Size),
@@ -106,7 +107,7 @@ execute_move(stack, [Board, Next], Moves, NewState) :-
     display_target_menu,
     read_player_input(Pos2, Moves),
     validate_board_choice(Pos2, Size),
-    move_pre_val([Board, Next], [Pos1, Pos2], NewState, Moves).
+    move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
  
 validate_valid_stack(_, []) :-
   write('Select a valid stack'),nl,
@@ -500,3 +501,25 @@ valid_chess_coord(ChessCoord) :-
     atom_chars(ChessCoord, [Letter|NumberChars]),
     valid_chess_letter(Letter),
     NumberChars \= [].
+
+choose_move(GameState, 1, Move) :-
+  valid_moves(GameState, Moves),
+  random_member(Move, Moves).
+
+choose_move(GameState, 2, BestMove) :-
+  valid_moves(GameState, Moves),
+  find_best_move(GameState, Moves, BestMove).
+
+find_best_move(GameState, [Move|RestMoves], BestMove) :-
+  move(GameState, Move, NewState),
+  value(NewState,a,Value),
+  find_best_move_aux(GameState, RestMoves, Move, Value, BestMove).
+
+find_best_move_aux(GameState, [], BestMove, _, BestMove).
+find_best_move_aux(GameState, [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
+  move(GameState, Move, NewState),
+  value(NewState, a, NewValue),
+  (  NewValue > CurrentBestValue
+  -> find_best_move_aux(GameState, RestMoves, Move, NewValue, BestMove)
+  ;  find_best_move_aux(GameState, RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
+  ).
