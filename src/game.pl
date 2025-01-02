@@ -324,14 +324,7 @@ replace_nth(Row1, NewVal, NewRow, X) :-
 % OpponentMobility: Number of available valid moves the opponent has on the board
 % MobilityValue: Value of a current game state according to amount of available valid moves
 % Value: Overall value of a current game state (using the previously calculated values, with different levels of "importance")
-% game_over(+GameState, -Winner)
-% Determines if game is over and who won
-% GameState: [Board, Next] current board and player to move
-% Winner: Player who won the game
-% Game is over when current player has no valid moves, losing the game
-game_over([Board, CurrentPlayer], Winner) :-
-    valid_moves([Board, CurrentPlayer], []),
-    switch_player(CurrentPlayer, Winner).
+
 
 value([Board, Next], Player, Value) :-
     player_pieces(Board, Player, PlayerPieces),
@@ -362,3 +355,12 @@ stack_value(Board, Player, Value):-
     player_pieces(Board, Player, Positions),
     findall(StackValue, (member((_,_,StackValue), Positions)), Values),
     sumlist(Values, Value).
+
+% game_over(+GameState, -Winner)
+% Determines if game is over and who won
+% GameState: [Board, Next] current board and player to move
+% Winner: Player who won the game
+% Game is over when current player has no valid moves, losing the game
+game_over([Board, Next], Winner) :-
+    valid_moves([Board, Next], []),
+    switch_player(Next, Winner).

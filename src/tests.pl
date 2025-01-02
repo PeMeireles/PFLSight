@@ -15,8 +15,10 @@ run :-
   in_sight_test,
   move_tests,
   value_tests,
-% move_tests,
-  game_over_test,
+  game_over_test1,
+  game_over_test2,
+  write('game_over_test done'),nl,
+  
   !.
 
 
@@ -60,13 +62,16 @@ valid_moves2 :-
   Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
 ,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
+% Check no winner
+game_over_test1 :-
+    testBoard(g0, TestBoard),
+    \+ game_over([TestBoard, a], Winner).
 
-game_over_test:-
-  testBoard(go,Testboard),
-  game_over([Testboard, a], Winner),
-  write(Winner),
-  Winner = b.
-
+game_over_test2 :-
+    testBoard(g1, TestBoard),
+    game_over([TestBoard, a], Winner),
+    Winner = b.
+    
 
 display_tests :-
   fontTest,
@@ -165,8 +170,14 @@ testBoard(s4,[[a,-,a,-,a],
               [a,-,a,-,a]]).
 
 % Impossibel state but its only used for gameover
-testBoard(go,[[a2,b1,-,-,-],
+testBoard(g0,[[a2,b1,-,-,-],
               [b1,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-]]).
+
+testBoard(g1,[[a2,b1,-,-,-],
+              [b1,b1,-,-,-],
               [-,-,-,-,-],
               [-,-,-,-,-],
               [-,-,-,-,-]]).
