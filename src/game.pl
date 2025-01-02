@@ -59,7 +59,6 @@ game_loop(Gamestate) :-
     repeat,
         valid_moves(Gamestate, Moves),
         display_game(Gamestate),
-        write(Gamestate),nl,
         (handle_move(Gamestate, Moves, NewState) ->
             handle_game_state(NewState)
         ;   
@@ -93,7 +92,7 @@ handle_move([Board, b, P1, 0], Moves, NewState) :-
     move_type(Moves, Type),
     execute_move(Type, [Board, b, P1, 0], Moves, NewState).
     
-%handle_move([Board, Next, P1, P2], Moves, NewState) :-
+% handle_move([Board, Next, P1, P2], Moves, NewState) :-
     %choose_move
     
 

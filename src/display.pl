@@ -99,7 +99,7 @@ display_target_menu :-
 
 
 display_title(Next):- 
-%clear_screen, 
+  clear_screen, 
   write('Its '),
   write(Next),
   write(' Turn').
@@ -112,8 +112,7 @@ display_movesAux([]).
 display_movesAux([[[0,0], [_,_]] | _]) :-
     write('Put a piece wherever you like'),nl.
 
-display_movesAux([[OX,OY], [X,Y] | Rest]) :-
-    write(Y),nl,
+display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
     codeletter(OX, Letter1),
     codeletter(X, Letter2),
     write('From '), write(Letter1), write(OY), write(' to '), write(Letter2), write(Y), nl,
