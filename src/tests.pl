@@ -15,6 +15,8 @@ run :-
   in_sight_test,
   move_tests,
   value_tests,
+% move_tests,
+  game_over_test,
   !.
 
 
@@ -59,7 +61,11 @@ valid_moves2 :-
 ,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
 
-
+game_over_test:-
+  testBoard(go,Testboard),
+  game_over([Testboard, a], Winner),
+  write(Winner),
+  Winner = b.
 
 
 display_tests :-
@@ -157,4 +163,11 @@ testBoard(s4,[[a,-,a,-,a],
               [a,-,a,-,a],
               [-,-,-,-,-],
               [a,-,a,-,a]]).
+
+% Impossibel state but its only used for gameover
+testBoard(go,[[a2,b1,-,-,-],
+              [b1,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,-,-]]).
 
