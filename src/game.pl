@@ -54,19 +54,22 @@ start_game((Size, P1, P2)) :-
 
 % game_loop(+GameState)
 % Main game loop handling moves and display
-game_loop([Board, Next]) :-
+game_loop(Gamestate) :-
     repeat,
-        valid_moves([Board, Next], Moves),
-        display_game([Board, Next], Moves),
-        (handle_move([Board, Next], Moves, NewState) ->
+        valid_moves(Gamestate, Moves),
+        display_game(Gamestate),
+        (handle_move(Gamestate, Moves, NewState) ->
             handle_game_state(NewState)
         ;   
-            handle_invalid_move
+            handle_invalid_move,
+            game_loop(Gamestate)
         ).
 
 handle_game_state(State) :-
     game_over(State, Winner),
     (Winner \= 0 ->
+        display_rows(Board),
+
         display_winner(Winner), !
     ;   
         game_loop(State)
@@ -75,37 +78,36 @@ handle_game_state(State) :-
 handle_invalid_move :-
     write('Invalid move. Try again.'), nl,
     wait_for_enter,
-    clear_screen,
-    fail.
+    clear_screen.
 
 
 % handle_move(+GameState, +ValidMoves, -NewState)
 % Handles move input based on game state
-handle_move([Board, Next], Moves, NewState) :-
-    check_no_stacks(Moves) ->
-        handle_new_piece([Board, Next], Moves, NewState)
-    ;   
-        handle_regular_move([Board, Next], Moves, NewState).
+handle_move(Gamestate, Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, Gamestate, Moves, NewState).
 
 % handle_new_piece(+GameState, +ValidMoves, -NewState)
 % Handles moves when no stacks present
-handle_new_piece([Board, Next], Moves, NewState) :-
-    read(P1X-P1Y),
-    validate_board_choice([P1X,P1Y], Size),
-    move_pre_val([Board, Next], [[0,0], [P1X,P1Y]], NewState, Moves).
+execute_move(new_piece, [Board, Next], Moves, NewState) :-
+    display_new_piece,
+    read_player_input(Pos1, Moves),
+    validate_board_choice(Pos1, Size),
+    move_pre_val([Board, Next], [[0,0], Pos1], NewState, Moves).
 
 
 % handle_regular_move(+GameState, +ValidMoves, -NewState)
 % Handles moves when stacks are present
-handle_regular_move([Board, Next], Moves, NewState) :-
-    read(P1X-P1Y),
-    validate_board_choice([P1X,P1Y], Size),
-    validate_valid_stack([P1X,P1Y], Moves),
+execute_move(stack, [Board, Next], Moves, NewState) :-
+    display_stack_drop,
+    read_player_input(Pos1, Moves),
+    validate_board_choice(Pos1, Size),
+    validate_valid_stack(Pos1, Moves),
     display_target_menu,
-    read(P2X-P2Y),
-    validate_board_choice([P2X,P2Y], Size),
-    move_pre_val([Board, Next], [[P1X,P1Y], [P2X,P2Y]], NewState, Moves).
-  
+    read_player_input(Pos2, Moves),
+    validate_board_choice(Pos2, Size),
+    move_pre_val([Board, Next], [Pos1, Pos2], NewState, Moves).
+ 
 validate_valid_stack(_, []) :-
   write('Select a valid stack'),nl,
   false.
@@ -454,4 +456,47 @@ game_overAux(Next, Moves, 0).
 
 check_no_stacks([ [FPos | _] |_]) :-
     FPos = [0,0].
- 
+
+move_type(Moves, new_piece) :-
+  check_no_stacks(Moves),!.
+move_type(_, stack).
+
+read_player_input(Pos, Moves) :-
+  read(Input),
+  atom(Input),
+  handle_input(Input, Pos, Moves).
+  
+handle_input(v,Pos, Moves) :-
+  display_moves(Moves),
+  read_player_input(Pos, Moves), !.
+
+handle_input(x, _, _) :-
+  halt.
+
+handle_input(Input,Pos, Moves) :-
+  valid_chess_coord(Input),
+  coords_to_pos(Input, Pos).
+
+% coords_to_pos(+Atom, -Tuple)
+% Converts chess notation to tuple coordinates
+coords_to_pos(ChessCoord, [Y,X]) :-
+    atom(ChessCoord),
+    atom_chars(ChessCoord, [Letter|NumberChars]),
+    char_code(Letter, Code),
+    X is Code - 96,
+    number_chars(Y, NumberChars).
+
+
+% valid_chess_letter(+Letter)
+% Checks if the given letter is a valid chess coordinate letter
+valid_chess_letter(Letter) :-
+    char_code(Letter, Code),
+    between(97,122,Code).
+
+
+% valid_chess_coord(+ChessCoord)
+% Validates if the input is a valid chess coordinate
+valid_chess_coord(ChessCoord) :-
+    atom_chars(ChessCoord, [Letter|NumberChars]),
+    valid_chess_letter(Letter),
+    NumberChars \= [].

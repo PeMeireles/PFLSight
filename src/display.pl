@@ -83,15 +83,12 @@ display_stack_drop :-
   write('Since you have one or more stacks, please select one of them so you can move the piece on top'),nl.
 
  % --------------------------- 
-display_game([Board,Next], Moves) :-
+display_game([Board,Next]) :-
   display_title(Next),nl,
-  display_rows(Board),nl,
-  display_options(Moves).
+  display_rows(Board),nl.
 
-display_options(Moves):-
-    check_no_stacks(Moves),
-    display_new_piece, !.
-  
+
+
 display_options(Moves):-
     display_stack_drop.
 
@@ -105,31 +102,55 @@ display_title(Next):-
   clear_screen, 
   write('Its '),
   write(Next),
-  write('Turn').
+  write(' Turn').
 
+display_moves(Moves) :-
+  write('Here are your moves:'),nl,
+  display_movesAux(Moves).
 
-display_winner(Winner).
+display_movesAux([]).
+display_movesAux([[[0,0], [_,_]] | _]) :-
+    write('Put a piece wherever you like'),nl.
+
+display_movesAux([[OX,OY], [X,Y] | Rest]) :-
+    write(Y),nl,
+    codeletter(OX, Letter1),
+    codeletter(X, Letter2),
+    write('From '), write(Letter1), write(OY), write(' to '), write(Letter2), write(Y), nl,
+    display_movesAux(Rest).
+
+display_winner(Winner) :-
+    write('Não se quê'), write(Winner),nl.
 
 
   %---------------------------------------------------
 display_rows(Board) :-
+  write('  '),
+  display_column_letters_aux(5), nl,
   display_rowsAux(Board, 5, 0).
+
+display_column_letters_aux(0).
+display_column_letters_aux(N) :-
+    N1 is N - 1,
+    display_column_letters_aux(N1),
+    codeletter(N, Char),
+write(Char), write('   ').
 
 
 display_rowsAux([Row | _], 1, _) :-
-    display_row(Row), !.
+    write('1 '), display_row(Row), !.
 
 display_rowsAux([Row | Rest], N, 0):-
     N > 0,
-    display_row(Row), nl,
-    write('| \\ | / | \\ | / |'), nl,
+    write(N), write(' '), display_row(Row), nl,
+    write('| | \\ | / | \\ | / |'), nl,
     N1 is N - 1,
     display_rowsAux(Rest, N1, 1).
 
 display_rowsAux([Row | Rest], N, 1):-
     N > 0,
-    display_row(Row), nl,
-    write('| / | \\ | / | \\ |'), nl,
+    write(N), write(' '), display_row(Row), nl,
+    write('| | / | \\ | / | \\ |'), nl,
     N1 is N - 1,
     display_rowsAux(Rest, N1, 0).
 
@@ -140,8 +161,15 @@ display_row([-| Rest]):-
   display_row(Rest).
 
 display_row([Char | Rest]):-
-  lettermap(Char, Val),
+  lettermap(Char,Val),
   write(Val),
   (Rest \= [] -> write('---') ; true ),
   display_row(Rest).
+
+% lettermap(+Val, -Char)
+codeletter(Val, Char) :-
+    Code is Val + 96,
+    char_code(Char, Code).
+
+
 
