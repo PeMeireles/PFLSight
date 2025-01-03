@@ -92,8 +92,27 @@ handle_move([Board, b, P1, 0], Moves, NewState) :-
     move_type(Moves, Type),
     execute_move(Type, [Board, b, P1, 0], Moves, NewState).
     
-% handle_move([Board, Next, P1, P2], Moves, NewState) :-
-    %choose_move
+handle_move([Board, a, 1, P2], Moves, NewState) :-
+    choose_move([Board, a, 1, P2], 1 , Move),
+    move([Board, a, 1, P2], Move,NewState),
+    wait_for_enter.
+
+handle_move([Board, a, 2, P2], Moves, NewState) :-
+    choose_move([Board, a, 1, P2], 2 , Move),
+    move([Board, a, 2, P2], Move,NewState),
+    wait_for_enter.
+
+handle_move([Board, b, P1, 1], Moves, NewState) :-
+    choose_move([Board, b, P1, 1], 1 , Move),
+    move([Board, b, P1, 1], Move,NewState),
+    wait_for_enter.
+
+handle_move([Board, b, P1, 2], Moves, NewState) :-
+    choose_move([Board, b, P1, 2], 2 , Move),
+    move([Board, b, P1, 2], Move,NewState),
+    wait_for_enter.
+
+
     
 
 % handle_new_piece(+GameState, +ValidMoves, -NewState)
@@ -488,7 +507,7 @@ handle_input(Input,Pos, Moves) :-
 
 % coords_to_pos(+Atom, -Tuple)
 % Converts chess notation to tuple coordinates
-coords_to_pos(ChessCoord, [Y,X]) :-
+coords_to_pos(ChessCoord, [X,Y]) :-
     atom(ChessCoord),
     atom_chars(ChessCoord, [Letter|NumberChars]),
     char_code(Letter, Code),
