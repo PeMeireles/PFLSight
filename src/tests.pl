@@ -2,6 +2,8 @@
 :- consult(movetests).
 :- consult(valuetests).
 :- consult(choose_movetests).
+
+% Main predicate that runs all tests in sequence. 
 run :-
   boardaccess,
   write('Board Access done'),nl,
@@ -27,7 +29,7 @@ run :-
   !.
 
 
-
+% Verifies that elements in a predefined test board can be accessed correctly using access_board/3.
 boardaccess :-
   testBoard(2,Testboard),
   nth1(1, Testboard, Row),
@@ -41,18 +43,13 @@ boardaccess :-
   access_board(Testboard, [2,4],Val2),
   Val2 = 'a2'.
 
-valid_moves1 :- %No stacks no b pieces
+% Tests valid_moves/2 with a board containing no stacks and no 'b' pieces.
+valid_moves1 :- 
   testBoard(5,Testboard),
   valid_moves([Testboard,b,0,0], Positions),
   Positions = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]],[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]],[[0,0],[2,2]],[[0,0],[3,2]],[[0,0],[4,2]],[[0,0],[5,2]],[[0,0],[1,3]],[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]],[[0,0],[1,4]],[[0,0],[2,4]],[[0,0],[3,4]],[[0,0],[4,4]],[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]],[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]].
 
-valid_moves3 :-
-  testBoard(3,Testboard),
-  valid_moves([Testboard, a,0,0], Positions),
-  Positions = [[[2,3],[1,3]],[[2,3],[2,2]]],
-  valid_moves([Testboard, b,0,0], Positions2),
-  Positions2 = [[[2,1],[1,1]],[[2,1],[2,2]],[[2,1],[3,1]],[[5,5],[4,4]],[[5,5],[4,5]],[[5,5],[5,4]]].
-
+% Tests valid_moves/2 and find_biggest_stacks/4 on testBoard(2) to validate move generation and stack detection.
 valid_moves2 :-
   testBoard(2,Testboard),
   find_biggest_stacks(Testboard, a, Positions, _),
@@ -72,23 +69,35 @@ valid_moves2 :-
   Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
 ,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
-% Check no winner
+% Verifies specific move generation on testBoard(3) for both players 'a' and 'b'.
+valid_moves3 :-
+  testBoard(3,Testboard),
+  valid_moves([Testboard, a,0,0], Positions),
+  Positions = [[[2,3],[1,3]],[[2,3],[2,2]]],
+  valid_moves([Testboard, b,0,0], Positions2),
+  Positions2 = [[[2,1],[1,1]],[[2,1],[2,2]],[[2,1],[3,1]],[[5,5],[4,4]],[[5,5],[4,5]],[[5,5],[5,4]]].
+
+% Tests game_over/2 with no winner scenario using testBoard(g0).
 game_over_test1 :-
     testBoard(g0, TestBoard),
     game_over([TestBoard, a,0,0], 0).
 
+% Tests game_over/2 with player 'b' winning using testBoard(g1).
 game_over_test2 :-
     testBoard(g1, TestBoard),
     game_over([TestBoard, a,0,0], b).
 
+% Tests game_over/2 with no winner scenario using testBoard(g2).
 game_over_test3 :-
     testBoard(g2, TestBoard),
     game_over([TestBoard, b,0,0], 0).
 
+% Tests game_over/2 with no winner scenario using testBoard(g3).
 game_over_test4 :-
     testBoard(g3, TestBoard),
     game_over([TestBoard, a,0,0], 0).
 
+% Runs tests to display and print the board representation of the current game state.
 display_tests :-
   fontTest,
   testBoard(2,Testboard),
@@ -96,7 +105,7 @@ display_tests :-
   board(5,Testboard2),
   display_rows(Testboard2),nl.
 
-
+% Tests the mapping of letters to specific pieces on the board (e.g., a1, a2, b1, b2).
 fontTest :-
   lettermap(a1,Val),
   write('1 white piece:  '),
@@ -124,7 +133,7 @@ fontTest :-
   write(Val8),nl.
 
 
-
+% Testboards used for testing
 testBoard(1, [[-,-,-,-,-], 
               [-,-,-,-,-],
               [-,-,-,-,-],
@@ -193,7 +202,7 @@ testBoard(s4,[[a,-,a,-,a],
               [-,-,-,-,-],
               [a,-,a,-,a]]).
 
-% Impossibel state but its only used for gameover
+% Impossible state but its only used for gameover
 testBoard(g0,[[a2,b1,-,-,-],
               [b1,-,-,-,-],
               [-,-,-,-,-],
@@ -217,3 +226,8 @@ testBoard(g3,[[b1,-,-,-,-],
               [-,-,-,-,-],
               [-,-,-,-,-],
               [-,-,-,-,-]]).
+
+
+
+
+

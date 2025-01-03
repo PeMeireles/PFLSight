@@ -1,23 +1,25 @@
+% Runs a series of tests to verify the correctness of the move/3 predicate.  
+% If all tests pass, outputs a success message 'move tests passed'.
 move_tests :-
   move_valid_tests2,
   move_valid_tests3,
   write('move tests passed'),nl.
-  %move_invalid_tests,
 
-% General Tests
+% Tests the move/3 predicate for general valid moves involving stacking and simple piece movement.
 move_valid_tests2 :-
   testBoard(2,Testboard),
-  % General test from stack
+
   move([Testboard,a,0,0], [[2,4],[3,4]],[NewBoard, NewNext,_,_]),
 NewBoard = [[-,-,-,-,-],[-,a1,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
   NewNext = b,
-  % General test no stacks
+
   move([Testboard,b,0,0], [[0,0],[4,4]], [NewBoard2, NewNext2,_,_]),
   NewNext2 = a,
   NewBoard2 = [[-,-,-,-,-],[-,a2,-,b1,-],[-,-,a1,-,-],[-,-,b1,b2,-],[-,-,-,-,-]].
 
+% Tests the move/3 predicate for diagonal movements and position correctness.
 move_valid_tests3 :-
-  % Move with 1 diagonal sitght
+
   testBoard(3, Testboard),
   move([Testboard,a,0,0], [[2,3],[2,2]],[NewBoard, _,_,_]),
   NewBoard = [[-,a2,-,-,b3], 
@@ -25,7 +27,6 @@ move_valid_tests3 :-
               [-,a2,a2,-,-],
               [-,a1,b1,b1,-],
               [-,b3,-,-,-]],
-  % Test if its not skipping the starting position
   move([Testboard, a,0,0], [[2,3],[1,3]], [NewBoard2, _,_,_]),
   NewBoard2 =[[-,a2,-,-,b3], 
               [-,a3,-,-,-],
@@ -34,9 +35,20 @@ move_valid_tests3 :-
               [-,b3,-,-,-]].
 
 
+%=======================================================================================================%
 
 
-% -----------------------------------------------------------
+% Runs a series of tests for different board visibility scenarios to ensure correctness of in_sight/3.
+% If all tests pass, outputs a success message 'all sight tests passed'.
+in_sight_test :-
+  in_sight4,
+  test_edges_sight,
+  test_corners_sight,
+  test_full_box_sight,
+  test_intersections_sight,
+  write('all sight tests passed'), nl.
+
+% Tests the in_sight/3 predicate for visibility of pieces from a given position.
 in_sight4 :-
   testBoard(4,Testboard),
   in_sight([Testboard, a,0,0], [3,3], Locations),
@@ -46,18 +58,7 @@ in_sight4 :-
   sort(Locations2, Temp2),
   Temp2 = [[2,2],[3,5],[4,2]].
 
-in_sight_test :-
-  %in_sight_diagonal3,
-  %in_sight_row3,
-  %in_sight_col3,
-  in_sight4,
-  test_edges_sight,
-  test_corners_sight,
-  test_full_box_sight,
-  test_intersections_sight,
-  write('all sight tests passed'), nl.
-
-
+% Tests visibility from positions near the board edges using in_sight/3.
 test_edges_sight :-
     testBoard(s1, Board),
     in_sight([Board, a, 0,0], [3,1], Loc1),
@@ -67,6 +68,7 @@ test_edges_sight :-
     sort(Loc2, Temp2),
     Temp2 = [[1,1],[1,5],[2,2],[2,4],[5,3]].
 
+% Tests visibility from corner positions using in_sight/3.
 test_corners_sight :-
     testBoard(s2, Board),
     in_sight([Board, a,0,0], [1,1], Loc1),
@@ -79,6 +81,7 @@ test_corners_sight :-
     sort(Loc3,Temp3),
     Temp3 = [[4,2],[5,1],[5,3]].
 
+% Tests visibility within a box-shaped region using in_sight/3.
 test_full_box_sight :-
     testBoard(s3, Board),
     in_sight([Board, a,0,0], [3,3], Loc1),
@@ -88,6 +91,7 @@ test_full_box_sight :-
     sort(Loc2, Temp2),
     Temp2 = [[2,4],[3,3],[3,5],[4,4]].
 
+% Tests visibility from intersection points using in_sight/3.
 test_intersections_sight :-
     testBoard(s4, Board),
     in_sight([Board, a,0,0], [2,2], Loc1),
@@ -96,4 +100,5 @@ test_intersections_sight :-
     in_sight([Board, a,0,0], [3,2], Loc2),
     sort(Loc2, Temp2),
     Temp2 = [[3,1],[3,3]].
+
 
