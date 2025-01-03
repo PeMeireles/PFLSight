@@ -519,6 +519,12 @@ valid_chess_coord(ChessCoord) :-
     valid_chess_letter(Letter),
     NumberChars \= [].
 
+% choose_move(+GameState, +Level, -Move)
+% Selects a move for the given computer player based on the current GameState.
+% If the computer is random (level 1), a random valid move is chosen, if the 
+% computer is smart (level 2), the best move is selected based on the evaluation 
+% of game states (uses the value function).
+
 choose_move(GameState, 1, Move) :-
   valid_moves(GameState, Moves),
   random_member(Move, Moves).
@@ -527,10 +533,23 @@ choose_move(GameState, 2, BestMove) :-
   valid_moves(GameState, Moves),
   find_best_move(GameState, Moves, BestMove).
 
+% find_best_move(+GameState, +Moves, -BestMove)
+% Evaluates each move in the list of Moves for the given GameState and returns the move with the highest value.
+% Simulates each move and computes the resulting game state, then uses the value/3 predicate to calculate the
+% heuristic value of each resulting game state, and % finally calls find_best_move_aux/5 to iterate over all
+% remaining moves and find the optimal one.
+
 find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
   move([Board, Next, P1, P2], Move, NewState),
   value(NewState,Next,Value),
   find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, Value, BestMove).
+
+% find_best_move_aux(+GameState, +Moves, +CurrentBestMove, +CurrentBestValue, -BestMove)
+% Helper predicate that recursively (tail recursion) evaluates a list of moves to find the best one.
+% For each move, it simulates the game state and calculates its heuristic value, then compares the 
+% value of the current move with the CurrentBestValue, it updates CurrentBestMove if a better move 
+% is found and continues the recursion, finally, it ends recursion when there are no more moves left,
+% returning the BestMove.
 
 find_best_move_aux(_, [], BestMove, _, BestMove).
 find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-

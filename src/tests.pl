@@ -1,6 +1,7 @@
 :- consult(game).
 :- consult(movetests).
 :- consult(valuetests).
+:- consult(choose_movetests).
 run :-
   boardaccess,
   write('Board Access done'),nl,
@@ -20,6 +21,8 @@ run :-
   game_over_test3,
   game_over_test4,
   write('game_over_test done'),nl,
+
+  run_choose_move_tests,
   
   !.
 
@@ -157,6 +160,12 @@ testBoard(6,[[a3,-,-,-,-],
               [a3,-,-,-,b3],
               [-,-,b2,-,-],
               [-,-,-,-,b2]]).
+
+testBoard(7, [[a1,-,-,-,-], 
+              [-,-,-,-,-],
+              [-,-,-,-,-],
+              [-,-,-,b4,b4],
+              [a1,-,-,-,b4]]).
 
 
 % Removed numbers since those boards are exclusive to in_sight

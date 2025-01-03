@@ -1,7 +1,7 @@
 move_tests :-
   move_valid_tests2,
   move_valid_tests3,
-  write('Move tests passed'),nl.
+  write('move tests passed'),nl.
   %move_invalid_tests,
 
 % General Tests
@@ -55,7 +55,7 @@ in_sight_test :-
   test_corners_sight,
   test_full_box_sight,
   test_intersections_sight,
-  write('All Sight tests passed!'), nl.
+  write('all sight tests passed'), nl.
 
 
 test_edges_sight :-
