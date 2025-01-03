@@ -28,6 +28,12 @@ lettermap(b2,'Q').
 lettermap(b3,'J').
 lettermap(b4,'X').
 
+% Extreme cases, could happen but I never reached them.
+lettermap(a5,'PK').
+lettermap(a6,'PV').
+lettermap(b5,'XZ').
+lettermap(b6,'XQ').
+
 % wait_for_enter/0
 % Pauses execution until user presses Enter
 wait_for_enter :-
@@ -46,10 +52,7 @@ clear_screen :-
 
 % validate_choice(+Choice, +Choices)
 % Validates if given choice is member of valid choices list
-% Choice: User input to validate
-% Choices: List of valid options
 % Fails with error message if choice is invalid
-% TODO ver se precisa cut
 validate_choice(Choice, Choices) :-
     member(Choice, Choices).
 validate_choice(_,_) :-
@@ -57,12 +60,15 @@ validate_choice(_,_) :-
     wait_for_enter,
     false.
 
+% validate_board_choice(+Pos,+Size)
+% checks if user inputed pos is within the board
 validate_board_choice([X,Y], _) :-
     board_position(X,Y).
 validate_board_choice(_,_) :-
     write('Invalid board position.'), nl,
     false.
 
+% Options text
 display_start_menu :-
   write('What mode you want to play?'),nl,
   write('1 - player vs player'),nl,
@@ -85,23 +91,28 @@ display_stack_drop :-
   write('Hint: You can type \'v\' to see what moves you can do.'), nl.
 
  % --------------------------- 
+% display_game/0
+% Turn interface
 display_game([Board,Next, _,_]) :-
   display_title(Next),nl,
   display_rows(Board),nl.
 
 
-
+% display_options/0
+% Turn menu to for a move
 display_options(Moves):-
     display_stack_drop.
 
-
+% display_target_menu/0
+% Second menu after stack move
 display_target_menu :-
   write('Now select where to move it to.'),nl,
   write('Note: it has to be an adjacent slot.'),nl,
   write('Input e.g.: (a1).'), nl.
 
 
-
+% display_title(+Next)
+% Show's who turn is it
 display_title(Next):- 
   clear_screen, 
   write('Type \'x\' to close at any time.'), nl,
@@ -111,6 +122,8 @@ display_title(Next):-
   write('\'s'),
   write(' turn!').
 
+% display_moves(+Moves)
+% Show the valid moves
 display_moves(Moves) :-
   write('Here are your moves:'),nl,
   display_movesAux(Moves).
@@ -125,6 +138,8 @@ display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
     write('From '), write(Letter1), write(OY), write(' to '), write(Letter2), write(Y), nl,
     display_movesAux(Rest).
 
+% display_winner(+Winner)
+% End screen for the Winner
 display_winner(Winner) :-
     nl, nl,
     write('      '),
@@ -133,6 +148,8 @@ display_winner(Winner) :-
     write('      '), nl.
 
   %---------------------------------------------------
+% display_rows(+Board)
+% Recursively display the Board with side indications for move coordinates
 display_rows(Board) :-
   write('  '),
   display_column_letters_aux(5), nl,
@@ -145,37 +162,48 @@ display_column_letters_aux(N) :-
     codeletter(N, Char),
 write(Char), write('   ').
 
-
 display_rowsAux([Row | _], 1, _) :-
-    write('1 '), display_row(Row), !.
+    write('1 '), 
+    display_row(Row), !.
 
 display_rowsAux([Row | Rest], N, 0):-
     N > 0,
-    write(N), write(' '), display_row(Row), nl,
+    write(N), write(' '), 
+    display_row(Row), nl,
     write('| | \\ | / | \\ | / |'), nl,
     N1 is N - 1,
     display_rowsAux(Rest, N1, 1).
 
 display_rowsAux([Row | Rest], N, 1):-
     N > 0,
-    write(N), write(' '), display_row(Row), nl,
+    write(N), write(' '), 
+    display_row(Row), nl,
     write('| | / | \\ | / | \\ |'), nl,
     N1 is N - 1,
     display_rowsAux(Rest, N1, 0).
 
 display_row([]).
-display_row([-| Rest]):-
-  write(' '),
-  (Rest \= [] -> write('---') ; true ),
-  display_row(Rest).
+display_row([-| []]) :-
+    write(' ').
+display_row([-| Rest]) :-
+    Rest \= [],
+    write(' '),
+    write('---'),
+    display_row(Rest).
 
-display_row([Char | Rest]):-
-  lettermap(Char,Val),
-  write(Val),
-  (Rest \= [] -> write('---') ; true ),
-  display_row(Rest).
+display_row([Char | []]) :-
+    lettermap(Char, Val),
+    write(Val).
+display_row([Char | Rest]) :-
+    Rest \= [],
+    lettermap(Char, Val),
+    write(Val),
+    write('---'),
+    display_row(Rest).
+
 
 % lettermap(+Val, -Char)
+% Maps the Y cord to a letter
 codeletter(Val, Char) :-
     Code is Val + 96,
     char_code(Char, Code).
