@@ -31,7 +31,7 @@ lettermap(b4,'X').
 % wait_for_enter/0
 % Pauses execution until user presses Enter
 wait_for_enter :-
-  write('Click enter to continue'),nl,
+  write('Click enter to continue.'),nl,
   get_char(_),
   get_char(_).
 
@@ -63,24 +63,26 @@ validate_board_choice(_,_) :-
     write('Invalid board position.'), nl,
     false.
 
-
 display_start_menu :-
-  write('please choose what mode you want to play:'),nl,
+  write('What mode you want to play?'),nl,
   write('1 - player vs player'),nl,
-  write('2 - player vs Computer'),nl,
-  write('3 - Computer vs Computer'),nl,
-  write('4 - Test Font'),nl.
+  write('2 - player vs computer'),nl,
+  write('3 - computer vs computer'),nl,
+  write('4 - test font'),nl.
 
 display_menu(computer) :-
-  write('Would you like the Computer to be:'),nl,
-  write('1 - Random'), nl,
-  write('2 - Smart'), nl.
+  write('The computer should be:'),nl,
+  write('1 - random'), nl,
+  write('2 - smart'), nl.
 
 display_new_piece :-
-  write('Since you have no stacks you can place a new piece anywhere'), nl.
+  write('Since you have no stacks, you can place a new piece anywhere.'), nl,
+  write('Input e.g.: (a1).'), nl.
 
 display_stack_drop :-
-  write('Since you have one or more stacks, please select one of them so you can move the piece on top'),nl.
+  write('Since you have one or more stacks, please select one of them so you can move the piece on top.'),nl,
+  write('Input e.g.: (a1).'),nl,
+  write('Hint: You can type \'v\' to see what moves you can do.'), nl.
 
  % --------------------------- 
 display_game([Board,Next]) :-
@@ -94,15 +96,20 @@ display_options(Moves):-
 
 
 display_target_menu :-
-  write('Now select where to move it to'),nl,
-  write('Note: it has to be an adjacent slot'),nl.
+  write('Now select where to move it to.'),nl,
+  write('Note: it has to be an adjacent slot.'),nl,
+  write('Input e.g.: (a1).'), nl.
+
 
 
 display_title(Next):- 
   clear_screen, 
-  write('Its '),
+  write('Type \'x\' to close at any time.'), nl,
+  write(' '),nl,
+  write('It\'s '),
   write(Next),
-  write(' Turn').
+  write('\'s'),
+  write(' turn!').
 
 display_moves(Moves) :-
   write('Here are your moves:'),nl,
@@ -110,7 +117,7 @@ display_moves(Moves) :-
 
 display_movesAux([]).
 display_movesAux([[[0,0], [_,_]] | _]) :-
-    write('Put a piece wherever you like'),nl.
+    write('Put a piece wherever you like.'),nl.
 
 display_movesAux([[OX,OY], [X,Y] | Rest]) :-
     write(Y),nl,
@@ -120,8 +127,8 @@ display_movesAux([[OX,OY], [X,Y] | Rest]) :-
     display_movesAux(Rest).
 
 display_winner(Winner) :-
-    write('Não se quê'), write(Winner),nl.
-
+    write(Winner),
+    write('wins!'),nl.
 
   %---------------------------------------------------
 display_rows(Board) :-

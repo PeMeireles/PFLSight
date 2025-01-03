@@ -42,7 +42,7 @@ handle_start_choice(3, (5,Choice1, Choice2)) :-
   validate_choice(Choice2, [1,2]), !.
 
 handle_start_choice(4, _) :-
-  write('If this character is a 4 stack white piece its working: P'), nl,
+  write('If this character is a 4 stack white piece, it\'s working: P'), nl,
   wait_for_enter, false.
 
 % start_game(+Config)
