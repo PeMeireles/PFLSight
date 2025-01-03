@@ -92,26 +92,16 @@ handle_move([Board, b, P1, 0], Moves, NewState) :-
     move_type(Moves, Type),
     execute_move(Type, [Board, b, P1, 0], Moves, NewState).
     
-handle_move([Board, a, 1, P2], Moves, NewState) :-
-    choose_move([Board, a, 1, P2], 1 , Move),
-    move([Board, a, 1, P2], Move,NewState),
+handle_move([Board, a, P1, P2], Moves, NewState) :-
+    choose_move([Board, a, P1, P2], P1 , Move),
+    move([Board, a, P1, P2], Move,NewState),
     wait_for_enter.
 
-handle_move([Board, a, 2, P2], Moves, NewState) :-
-    choose_move([Board, a, 1, P2], 2 , Move),
-    move([Board, a, 2, P2], Move,NewState),
-    wait_for_enter.
 
-handle_move([Board, b, P1, 1], Moves, NewState) :-
-    choose_move([Board, b, P1, 1], 1 , Move),
-    move([Board, b, P1, 1], Move,NewState),
+handle_move([Board, b, P1, P2], Moves, NewState) :-
+    choose_move([Board, b, P1, P2], P2 , Move),
+    move([Board, b, P1, P2], Move,NewState),
     wait_for_enter.
-
-handle_move([Board, b, P1, 2], Moves, NewState) :-
-    choose_move([Board, b, P1, 2], 2 , Move),
-    move([Board, b, P1, 2], Move,NewState),
-    wait_for_enter.
-
 
     
 
@@ -539,7 +529,7 @@ choose_move(GameState, 2, BestMove) :-
 
 find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
   move([Board, Next, P1, P2], Move, NewState),
-  value(NewState,a,Value),
+  value(NewState,Next,Value),
   find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, Value, BestMove).
 
 find_best_move_aux(_, [], BestMove, _, BestMove).
