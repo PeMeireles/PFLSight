@@ -28,8 +28,6 @@
 
 ## Installation and execution
 
-### Installing SICStus Prolog 4.9
-
 * Linux:
     * [write linux instructions here]
 * Windows:
