@@ -10,7 +10,7 @@ move_valid_tests2 :-
   testBoard(2,Testboard),
 
   move([Testboard,a,0,0], [[2,4],[3,4]],[NewBoard, NewNext,_,_]),
-NewBoard = [[-,-,-,-,-],[-,a1,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
+  NewBoard = [[-,-,-,-,-],[-,a1,a1,-,-],[-,-,a2,-,-],[-,-,b1,b1,-],[-,-,-,-,-]],
   NewNext = b,
 
   move([Testboard,b,0,0], [[0,0],[4,4]], [NewBoard2, NewNext2,_,_]),
@@ -42,6 +42,7 @@ move_valid_tests3 :-
 % If all tests pass, outputs a success message 'all sight tests passed'.
 in_sight_test :-
   in_sight4,
+  in_sight5,
   test_edges_sight,
   test_corners_sight,
   test_full_box_sight,
@@ -57,6 +58,13 @@ in_sight4 :-
   in_sight([Testboard, a,0,0], [3,2], Locations2),
   sort(Locations2, Temp2),
   Temp2 = [[2,2],[3,5],[4,2]].
+
+% Tests the in_sight/3 predicate for visibility when an oposite piece is in the way.
+in_sight5 :-
+  testBoard(si1,Testboard),
+  in_sight([Testboard, b,0,0], [3,5], Locations),
+  sort(Locations, Temp),
+  Temp = [[3,4]].
 
 % Tests visibility from positions near the board edges using in_sight/3.
 test_edges_sight :-

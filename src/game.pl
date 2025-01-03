@@ -1,14 +1,3 @@
-%% z -> / a trema 0666D -> ٭ Ú   
-%% /uniE001 -> \ 
-%% Z -> 1 preta -> z
-%% Q -> 2 pretas -> q
-%% J -> 3 pretas -> j
-%% X -> 4 pretas -> x
-%% K -> 1 branca -> k
-%% V -> 2 brancas -> v
-%% B -> 3 brancas -> b
-%% P -> 4 brancas -> p
-
 :- consult(display).
 :- use_module(library(between)).
 :- use_module(library(lists)).
@@ -33,12 +22,15 @@ get_valid_choice(Choice) :-
 
 % setup_game_options(+Choice, -Options)
 % Sets up game options based on menu choice
-setup_game_options(1, (5, 0, 0)).
+setup_game_options(1, (Size, 0,0)) :-
+    maybe_get_board_size(Size).
 
-setup_game_options(2, (5, 0, AIType)) :-
+setup_game_options(2, (Size, 0, AIType)) :-
+    maybe_get_board_size(Size),
     get_ai_type(AIType).
 
-setup_game_options(3, (5, AI1, AI2)) :-
+setup_game_options(3, (Size, AI1, AI2)) :-
+    maybe_get_board_size(Size),
     get_ai_type(AI1),
     write('And for the second one.'), nl,
     get_ai_type(AI2).
@@ -46,6 +38,35 @@ setup_game_options(3, (5, AI1, AI2)) :-
 setup_game_options(4, _) :-
     test_piece_display,
     fail.
+
+% maybe_get_board_size(-Size)
+% Optionally gets board size, defaults to 5
+maybe_get_board_size(Size) :-
+    write('Change board size? (y/n): '),
+    read(Response),
+    handle_size_response(Response, Size).
+
+% handle_size_response(+Response, -Size)
+% Handles user response for board size
+handle_size_response(y, Size) :- !,
+    get_board_size(Size).
+handle_size_response(Y, Size) :- !,
+    get_board_size(Size).
+handle_size_response(_, 5).  % default size
+
+% get_board_size(-Size)
+% Gets and validates board size selection
+get_board_size(Size) :-
+    repeat,
+    display_board_size_menu,
+    read(Size),
+    validate_board_size(Size), !.
+
+% validate_board_size(+Size)
+% Validates if size is odd and within bounds
+validate_board_size(Size) :-
+    Size mod 2 =:= 1,
+    between(5, 9, Size).
 
 % get_ai_type(-Type)
 % Gets and validates AI type selection
@@ -72,7 +93,7 @@ start_game(Options) :-
 
 % game_loop(+GameState)
 % Main game loop orchestrating game flow
-% GameState: [Board, CurrentPlayer, P1Type, P2Type]
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 game_loop(Gamestate) :-
     repeat,
         valid_moves(Gamestate, Moves),
@@ -133,7 +154,6 @@ handle_move([Board, b, P1, P2], Moves, NewState) :-
 execute_move(new_piece, Gamestate, Moves, NewState) :-
     display_new_piece,
     read_player_input(Pos1, Moves),
-    validate_board_choice(Pos1, Size),
     move_pre_val(Gamestate, [[0,0], Pos1], NewState, Moves).
 
 
@@ -142,11 +162,9 @@ execute_move(new_piece, Gamestate, Moves, NewState) :-
 execute_move(stack, Gamestate, Moves, NewState) :-
     display_stack_drop,
     read_player_input(Pos1, Moves),
-    validate_board_choice(Pos1, Size),
     validate_valid_stack(Pos1, Moves),
     display_target_menu,
     read_player_input(Pos2, Moves),
-    validate_board_choice(Pos2, Size),
     move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
  
 % validate_valid_stack(+Origin, +ValidMoves)
@@ -185,21 +203,31 @@ initial_state((Size, P1, P2), [Board, Next, P1, P2]) :-
 % Note: Internal board representation is top-to-bottom (Y1 = 6-Y),
 % while game logic uses bottom-to-top coordinates
 access_board(Board,[X,Y], Val) :-
-  Y1 is 6 - Y,
-  board_position(X,Y),
+  length(Board, Size),
+  Y1 is Size +1 - Y,
+  board_position(Board,X,Y),
   nth1(Y1, Board, Row),
   nth1(X,Row,Val).
 
-% board_position(-Row, -Col)
+% check_board_position(+Size, -Row, -Col)
 % Generates valid board coordinates
 % Succeeds for all positions within 5x5 board
-board_position(Row, Col) :-
-    between(1, 5, Row),
-    between(1, 5, Col).
+check_board_position(Size, Row, Col) :-
+    between(1, Size, Row),
+    between(1, Size, Col).
+
+% board_position(+Board, -Row, -Col)
+% Generates valid positions for given board
+% Board: Current game board
+% Row: Valid row coordinate
+% Col: Valid column coordinate
+board_position(Board, Row, Col):-
+    length(Board, Size),
+    check_board_position(Size, Row, Col).
 
 % valid_moves(+GameState, -ValidMoves)
 % Determines all valid moves for current player
-% GameState: [Board, Next, _, _] representing current board and player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % ValidMoves: List of [[StartRow,StartCol], [TargetRow,TargetCol]] valid moves
 valid_moves([Board, Next, _, _], Positions) :-
   % Check for the biggest stack
@@ -229,7 +257,7 @@ valid_movesAux(Board, _, StackPositions, Positions) :-
     findall([[StackRow, StackCol],[Row,Col]],
         (member([StackRow,StackCol], StackPositions),
          adjacent(StackRow, StackCol, Row, Col),
-         board_position(Row,Col),
+         board_position(Board,Row,Col),
          access_board(Board,[Row,Col], Elem),
          Elem = '-'),
         PositionsWithDuplicates),
@@ -241,7 +269,7 @@ valid_movesAux(Board, _, StackPositions, Positions) :-
 % to empty board positions
 empty_moves(Board, Positions) :-
   findall([[0,0],[Row,Col]],
-      (board_position(Col,Row),
+      (board_position(Board,Col,Row),
       access_board(Board,[Row,Col], Elem),
       Elem = '-'), Positions).
   
@@ -261,7 +289,7 @@ find_biggest_stacks(Board, Next, Positions, Max) :-
 % Returns list of (Row, Col, Value) tuples for all player's pieces
 player_pieces(Board, Next, Positions) :-
     findall((Row, Col, Value),
-        (board_position(Row, Col),
+        (board_position(Board,Row, Col),
          piece_value(Board, [Row, Col], Next, Value)),
         Positions).
 
@@ -315,7 +343,7 @@ steps_patterns(Row, Col, Steps) :-
 
 % in_sight(+GameState, +Position, -Locations)
 % Finds all positions that are in sight of the given position
-% GameState: [Board, Next, _, _], current board state and next player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % Position: [Row,Col] coordinates to check sight from
 % Locations: List of [Row,Col] positions that are in sight
 %
@@ -333,7 +361,7 @@ in_sight(Gamestate, [Row,Col], Locations) :-
 % Auxiliar function of in_sight
 % first_sight(+GameState, +Position, +Direction, -FoundPosition)
 % Finds the first non-empty position from the same player in the given direction, going step by step
-% GameState: [Board, Next, _, _], current board state and next player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % Position: [Row,Col] starting position
 % Direction: [DirectionX,DirectionY] direction to search
 % FoundPosition: [FRow,FCol] first position found with player's piece
@@ -344,10 +372,11 @@ in_sight(Gamestate, [Row,Col], Locations) :-
 % - Finding opponent's piece
 % Uses cut (!) to ensure only the first matching piece is returned
 first_sight([Board, Next, _, _], [Row, Col], [DirectionX, DirectionY], [FRow, FCol]) :-
-  between(1,5,Step),
+  length(Board,Size),
+  between(1,Size,Step),
   FRow is Row + (DirectionX * Step),
   FCol is Col + (DirectionY * Step),
-  board_position(FRow,FCol),
+  board_position(Board,FRow,FCol),
   access_board(Board, [FRow, FCol], Piece),
   Piece \= '-', !,
   atom_chars(Piece, [Next|_]).
@@ -360,7 +389,7 @@ firstpiece(b, b1).
 
 % move(+GameState, +Move, -NewGameState)
 % Executes a game move and updates the game state
-% GameState: [Board, Next, _, _], where Board is current board and Next is next player (the one taking action)
+% GameState: [Board, Next, P1, P2], where Board is current board and Next is next player (the one taking action) and AITypes
 % Move: [Origin,Target] representing start and end positions of the move
 % NewGameState: [NewBoard, NewNext] resulting state after move execution
 %
@@ -430,7 +459,8 @@ change_start_piece(Board, [X,Y], FinalBoard) :-
 % FinalBoard: Resulting board after replacement
 % Note: Y coordinate is inverted (6-Y) due to board representation, no need to check if X and Y are between (1-5) since its validated before
 replace_on_board(Board, [X,Y], Val, FinalBoard) :-
-  Y1 is 6-Y,
+  length(Board, Size),
+  Y1 is Size +1 -Y,
   nth1(Y1, Board, OldRow),
   replace_nth(OldRow, Val, NewRow, X),
   replace_nth(Board, NewRow, FinalBoard, Y1).
