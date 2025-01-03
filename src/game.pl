@@ -1,14 +1,3 @@
-%% z -> / a trema 0666D -> ٭ Ú   
-%% /uniE001 -> \ 
-%% Z -> 1 preta -> z
-%% Q -> 2 pretas -> q
-%% J -> 3 pretas -> j
-%% X -> 4 pretas -> x
-%% K -> 1 branca -> k
-%% V -> 2 brancas -> v
-%% B -> 3 brancas -> b
-%% P -> 4 brancas -> p
-
 :- consult(display).
 :- use_module(library(between)).
 :- use_module(library(lists)).
@@ -104,7 +93,7 @@ start_game(Options) :-
 
 % game_loop(+GameState)
 % Main game loop orchestrating game flow
-% GameState: [Board, CurrentPlayer, P1Type, P2Type]
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 game_loop(Gamestate) :-
     repeat,
         valid_moves(Gamestate, Moves),
@@ -238,7 +227,7 @@ board_position(Board, Row, Col):-
 
 % valid_moves(+GameState, -ValidMoves)
 % Determines all valid moves for current player
-% GameState: [Board, Next, _, _] representing current board and player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % ValidMoves: List of [[StartRow,StartCol], [TargetRow,TargetCol]] valid moves
 valid_moves([Board, Next, _, _], Positions) :-
   % Check for the biggest stack
@@ -354,7 +343,7 @@ steps_patterns(Row, Col, Steps) :-
 
 % in_sight(+GameState, +Position, -Locations)
 % Finds all positions that are in sight of the given position
-% GameState: [Board, Next, _, _], current board state and next player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % Position: [Row,Col] coordinates to check sight from
 % Locations: List of [Row,Col] positions that are in sight
 %
@@ -372,7 +361,7 @@ in_sight(Gamestate, [Row,Col], Locations) :-
 % Auxiliar function of in_sight
 % first_sight(+GameState, +Position, +Direction, -FoundPosition)
 % Finds the first non-empty position from the same player in the given direction, going step by step
-% GameState: [Board, Next, _, _], current board state and next player
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
 % Position: [Row,Col] starting position
 % Direction: [DirectionX,DirectionY] direction to search
 % FoundPosition: [FRow,FCol] first position found with player's piece
@@ -400,7 +389,7 @@ firstpiece(b, b1).
 
 % move(+GameState, +Move, -NewGameState)
 % Executes a game move and updates the game state
-% GameState: [Board, Next, _, _], where Board is current board and Next is next player (the one taking action)
+% GameState: [Board, Next, P1, P2], where Board is current board and Next is next player (the one taking action) and AITypes
 % Move: [Origin,Target] representing start and end positions of the move
 % NewGameState: [NewBoard, NewNext] resulting state after move execution
 %
