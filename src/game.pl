@@ -456,7 +456,7 @@ value([Board, Next, _, _], Player, Value) :-
     length(OpponentMoves, OpponentMobility),
     MobilityValue is PlayerMobility - OpponentMobility,
 
-    Value is (AmountValue * 1) + (StackValue * (-0.5)) + (MobilityValue * 2).
+    Value is (AmountValue * 1) + (StackValue * (-2)) + (MobilityValue * 2).
 
 % stack_value(+Board, +Player, -Value)
 % Sums the value of all the stacks of a player by iterating each player piece and getting its value
@@ -537,16 +537,16 @@ choose_move(GameState, 2, BestMove) :-
   valid_moves(GameState, Moves),
   find_best_move(GameState, Moves, BestMove).
 
-find_best_move(GameState, [Move|RestMoves], BestMove) :-
-  move(GameState, Move, NewState),
+find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
+  move([Board, Next, P1, P2], Move, NewState),
   value(NewState,a,Value),
-  find_best_move_aux(GameState, RestMoves, Move, Value, BestMove).
+  find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, Value, BestMove).
 
-find_best_move_aux(GameState, [], BestMove, _, BestMove).
-find_best_move_aux(GameState, [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
-  move(GameState, Move, NewState),
-  value(NewState, a, NewValue),
+find_best_move_aux(_, [], BestMove, _, BestMove).
+find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
+  move([Board, Next, P1, P2], Move, NewState),
+  value(NewState, Next, NewValue),
   (  NewValue > CurrentBestValue
-  -> find_best_move_aux(GameState, RestMoves, Move, NewValue, BestMove)
-  ;  find_best_move_aux(GameState, RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
+  -> find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, NewValue, BestMove)
+  ;  find_best_move_aux([Board, Next, P1, P2], RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
   ).
