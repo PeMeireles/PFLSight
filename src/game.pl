@@ -14,47 +14,65 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+% play/0
+% Main entry point for the game
 play :- 
+    get_valid_choice(Choice),
+    setup_game_options(Choice, Options),
+    start_game(Options).
+
+
+% get_valid_choice(-Choice)
+% Gets and validates menu choice
+get_valid_choice(Choice) :-
     repeat,
     clear_screen,
     display_start_menu,
     read(Choice),
-    validate_choice(Choice, [1,2,3,4]),
-    handle_start_choice(Choice, Options),
-    start_game(Options), !.
+    validate_choice(Choice, [1,2,3,4]), !.
 
+% setup_game_options(+Choice, -Options)
+% Sets up game options based on menu choice
+setup_game_options(1, (5, 0, 0)).
 
-handle_start_choice(1, (5, 0, 0)) :- !.
+setup_game_options(2, (5, 0, AIType)) :-
+    get_ai_type(AIType).
 
-handle_start_choice(2, (5, 0, Choice)) :-
-  repeat,
-  display_menu(computer),
-  read(Choice),
-  validate_choice(Choice, [1,2]),!.
+setup_game_options(3, (5, AI1, AI2)) :-
+    get_ai_type(AI1),
+    write('And for the second one.'), nl,
+    get_ai_type(AI2).
 
-handle_start_choice(3, (5,Choice1, Choice2)) :-
-  repeat,
-  display_menu(computer),
-  read(Choice1),
-  validate_choice(Choice1, [1,2]),
-  write('And for the second one.'),nl,
-  display_menu(computer),
-  read(Choice2),
-  validate_choice(Choice2, [1,2]), !.
+setup_game_options(4, _) :-
+    test_piece_display,
+    fail.
 
-handle_start_choice(4, _) :-
-  write('If this character is a 4 stack white piece, it\'s working: P'), nl,
-  wait_for_enter, false.
+% get_ai_type(-Type)
+% Gets and validates AI type selection
+get_ai_type(Type) :-
+    repeat,
+    display_menu(computer),
+    read(Type),
+    validate_choice(Type, [1,2]), !.
 
-% start_game(+Config)
-% Starts game with given configuration
-% Config: (Size, P1, P2) for board size and player types
+% test_piece_display/0
+% Tests piece display functionality
+test_piece_display :-
+    write('If this character is a 4 stack white piece, it\'s working: P'), nl,
+    wait_for_enter.
+
+% start_game(+Options)
+% Initializes and starts game with given configuration
+% Options: (Size, P1Type, P2Type) where:
+%   Size: Board size
+%   P1Type/P2Type: Player types (0-human, 1-random AI, 2-smart AI)
 start_game(Options) :-
     initial_state(Options, GameState),
     game_loop(GameState).
 
 % game_loop(+GameState)
-% Main game loop handling moves and display
+% Main game loop orchestrating game flow
+% GameState: [Board, CurrentPlayer, P1Type, P2Type]
 game_loop(Gamestate) :-
     repeat,
         valid_moves(Gamestate, Moves),
@@ -66,6 +84,9 @@ game_loop(Gamestate) :-
             game_loop(Gamestate)
         ).
 
+% handle_game_state(+GameState)
+% Processes game state after move
+% Checks for winner or continues game
 handle_game_state([Board, Next, P1, P2]) :-
     game_over([Board, Next, _, _], Winner),
     (Winner \= 0 ->
@@ -76,6 +97,8 @@ handle_game_state([Board, Next, P1, P2]) :-
         game_loop([Board, Next, P1, P2])
     ).
 
+% handle_invalid_move/0
+% Handles invalid move input
 handle_invalid_move :-
     write('Invalid move. Try again.'), nl,
     wait_for_enter,
@@ -83,7 +106,7 @@ handle_invalid_move :-
 
 
 % handle_move(+GameState, +ValidMoves, -NewState)
-% Handles move input based on game state
+% Handles move input based on game state and AIType
 handle_move([Board, a, 0, P2], Moves, NewState) :-
     move_type(Moves, Type),
     execute_move(Type, [Board, a, 0, P2], Moves, NewState).
@@ -126,6 +149,11 @@ execute_move(stack, Gamestate, Moves, NewState) :-
     validate_board_choice(Pos2, Size),
     move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
  
+% validate_valid_stack(+Origin, +ValidMoves)
+% Validates if Origin position is a valid stack to move from
+% Origin: [Row,Col] position to validate
+% ValidMoves: List of [[From,To]] valid moves
+% Fails with message if Origin is not a valid stack position
 validate_valid_stack(_, []) :-
   write('Select a valid stack'),nl,
   false.
@@ -135,9 +163,16 @@ validate_valid_stack(Origin, [[Origin, _] | _ ]) :-!.
 validate_valid_stack(Origin, [_ | T]) :-
     validate_valid_stack(Origin, T).
 
+% initial_state(+Config, -GameState)
+% Creates initial game state from configuration
+% Config: (Size, P1, P2) where:
+%   Size: Board size
+%   P1: Player 1 type (0-human, 1-random AI, 2-smart AI)
+%   P2: Player 2 type (0-human, 1-random AI, 2-smart AI)
+% GameState: [Board, CurrentPlayer, P1Type, P2Type]
 initial_state((Size, P1, P2), [Board, Next, P1, P2]) :-
   board(Size,Board),
-  Next = a. % Might do first player random
+  Next = a. 
 
 % access_board(+Board, +Position, -Value)
 % Accesses value at given position on game board
@@ -472,18 +507,31 @@ game_overAux(Next, [], Winner):-
 
 game_overAux(Next, Moves, 0).
 
+% check_no_stacks(+Moves)
+% Checks if moves start from position [0,0] (new piece placement)
+% Moves: List of [[FromPos,ToPos]|Rest] valid moves
 check_no_stacks([ [FPos | _] |_]) :-
     FPos = [0,0].
 
+
+% move_type(+Moves, -Type)
+% Determines move type based on valid moves
+% Type: new_piece if placing new piece, stack if moving existing piece
 move_type(Moves, new_piece) :-
   check_no_stacks(Moves),!.
 move_type(_, stack).
 
+% read_player_input(-Position, +Moves)
+% Reads and processes player input
+% Position: Resulting board position
+% Moves: List of valid moves
 read_player_input(Pos, Moves) :-
   read(Input),
   atom(Input),
   handle_input(Input, Pos, Moves).
-  
+
+% handle_input(+Input, -Position, +Moves)
+% Processes different types of input (commands or positions)
 handle_input(v,Pos, Moves) :-
   display_moves(Moves),
   read_player_input(Pos, Moves), !.
