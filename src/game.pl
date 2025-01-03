@@ -324,8 +324,8 @@ first_sight([Board, Next, _, _], [Row, Col], [DirectionX, DirectionY], [FRow, FC
   FCol is Col + (DirectionY * Step),
   board_position(FRow,FCol),
   access_board(Board, [FRow, FCol], Piece),
-  Piece \= '-',
-  atom_chars(Piece, [Next|_]), !.
+  Piece \= '-', !,
+  atom_chars(Piece, [Next|_]).
 
 switch_player(a, b).
 switch_player(b, a).
