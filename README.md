@@ -61,7 +61,7 @@
     * **Visibility:** 
         * Pieces are considered visible to one another if they are on the same grid line with no pieces in between.
     * **Gameplay:** 
-        * Players take turns, with the White player moving first;
+        * Players take turns, with the white player moving first;
         * On a turn, a player must perform one of two actions:
             * **Placement:** 
                 * If the player has no stacks on the board, they must place a piece on an empty space;
@@ -97,7 +97,7 @@ The `initial_state/2` predicate uses the `board/2` predicate to generate an empt
 * The game state is represented as a list: `[Board, CurrentPlayer, P1Type, P2Type]`:
     * **Board:** list of lists, where each inner list represents a row of the board. Each position on the board can hold a value:
         * '-' represents an empty space;
-        * Atoms like 'a1', 'b2', etc. represent pieces.:
+        * Atoms like 'a1', 'b2', etc. represent pieces:
             * The first character indicates the player ('a' or 'b') and the following characters represent the number of pieces in a stack. (e.g.: 'a1' is a single white piece, 'b3' is a stack of three black pieces).
     * **CurrentPlayer:** an atom ('a' or 'b') indicating the player who's turn it is;
     * **P1Type and P2Type:** represent the AI type for player 1 and player 2 respectively, they can also represent a human if their value is 0.
@@ -123,7 +123,7 @@ The `initial_state/2` predicate uses the `board/2` predicate to generate an empt
     * **Origin:** list [Row, Col] representing the starting position of the move. For a new piece placement, the origin is ''.
     * **Target:** list [Row, Col] representing the destination position of the move.
 
-The `move/3` predicate uses this representation to validate and execute a move.
+**The `move/3` predicate uses this representation to validate and execute a move.**
 
 The `move/3` predicate first checks if a move is in the list of valid moves. It then checks if the target position is in sight of other pieces to be incremented. It then executes the move by updating the board and switches the player.
 
@@ -139,7 +139,7 @@ The `read_player_input/2` predicate handles user input, reading coordinates in "
 This project implements a functional two-player board game with a basic AI. The core game logic is complete and functional. The limitations we found is that the game does not support any optional rules.  Future development could include an improved AI that implements the minimax algorithm, support for optional rules and graphical user interfaces, which may be considered a future roadmap for development.
 
 ## Bibliography
-https://moodle2425.up.pt/pluginfile.php/95732/mod_resource/content/3/PL6%20-%20Database%20Modification%20and%20Cycles.pdf
-https://moodle2425.up.pt/pluginfile.php/95734/mod_resource/content/4/PL9%20-%20Applications%20and%20Libraries.pdf
-https://sicstus.sics.se/sicstus/docs/4.0.0/html/sicstus.html/The-Prolog-Library.html
+* https://moodle2425.up.pt/pluginfile.php/95732/mod_resource/content/3/PL6%20-%20Database%20Modification%20and%20Cycles.pdf
+* https://moodle2425.up.pt/pluginfile.php/95734/mod_resource/content/4/PL9%20-%20Applications%20and%20Libraries.pdf
+* https://sicstus.sics.se/sicstus/docs/4.0.0/html/sicstus.html/The-Prolog-Library.html
 
