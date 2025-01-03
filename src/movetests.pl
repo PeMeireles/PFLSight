@@ -59,11 +59,12 @@ in_sight4 :-
   sort(Locations2, Temp2),
   Temp2 = [[2,2],[3,5],[4,2]].
 
+% Tests the in_sight/3 predicate for visibility when an oposite piece is in the way.
 in_sight5 :-
   testBoard(si1,Testboard),
   in_sight([Testboard, b,0,0], [3,5], Locations),
   sort(Locations, Temp),
-  write(Temp).
+  Temp = [[3,4]].
 
 % Tests visibility from positions near the board edges using in_sight/3.
 test_edges_sight :-

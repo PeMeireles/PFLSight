@@ -18,6 +18,9 @@ genBoard(Num, Board, Row, Acc) :-
   N1 is Num -1,
   genBoard(N1, Board, Row, [Row|Acc]).
 
+playerName(a,'Contestant1').
+playerName(b,'Contestant2').
+
 
 lettermap(a1,'K').
 lettermap(a2,'V').
@@ -60,14 +63,6 @@ validate_choice(_,_) :-
     wait_for_enter,
     false.
 
-% validate_board_choice(+Pos,+Size)
-% checks if user inputed pos is within the board
-validate_board_choice([X,Y], _) :-
-    board_position(X,Y).
-validate_board_choice(_,_) :-
-    write('Invalid board position.'), nl,
-    false.
-
 % Options text
 display_start_menu :-
   write('What mode you want to play?'),nl,
@@ -80,6 +75,14 @@ display_menu(computer) :-
   write('The computer should be:'),nl,
   write('1 - random'), nl,
   write('2 - smart'), nl.
+
+% display_board_size_menu/0
+% Displays board size selection menu
+display_board_size_menu :-
+    write('Select board size (odd number between 5 and 9):'), nl,
+    write('5  - 5x5 board'), nl,
+    write('7  - 7x7 board'), nl,
+    write('9  - 9x9 board'), nl.
 
 display_new_piece :-
   write('Since you have no stacks, you can place a new piece anywhere.'), nl,
@@ -114,11 +117,12 @@ display_target_menu :-
 % display_title(+Next)
 % Show's who turn is it
 display_title(Next):- 
+  playerName(Next,PlayerName),
   clear_screen, 
   write('Type \'x\' to close at any time.'), nl,
   write(' '),nl,
   write('It\'s '),
-  write(Next),
+  write(PlayerName),
   write('\'s'),
   write(' turn!').
 
@@ -141,9 +145,10 @@ display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
 % display_winner(+Winner)
 % End screen for the Winner
 display_winner(Winner) :-
+    playerName(Winner,WinnerName),
     nl, nl,
     write('      '),
-    write(Winner),
+    write(WinnerName),
     write(' wins!'),
     write('      '), nl.
 
@@ -152,8 +157,9 @@ display_winner(Winner) :-
 % Recursively display the Board with side indications for move coordinates
 display_rows(Board) :-
   write('  '),
-  display_column_letters_aux(5), nl,
-  display_rowsAux(Board, 5, 0).
+  length(Board,Size),
+  display_column_letters_aux(Size), nl,
+  display_rowsAux(Board, Size, 0, Size).
 
 display_column_letters_aux(0).
 display_column_letters_aux(N) :-
@@ -162,25 +168,25 @@ display_column_letters_aux(N) :-
     codeletter(N, Char),
 write(Char), write('   ').
 
-display_rowsAux([Row | _], 1, _) :-
+display_rowsAux([Row | _], 1, _, _) :-
     write('1 '), 
     display_row(Row), !.
 
-display_rowsAux([Row | Rest], N, 0):-
+display_rowsAux([Row | Rest], N, 0, MaxSize):-
     N > 0,
     write(N), write(' '), 
     display_row(Row), nl,
-    write('| | \\ | / | \\ | / |'), nl,
+    display_lines_row(MaxSize,0), nl,
     N1 is N - 1,
-    display_rowsAux(Rest, N1, 1).
+    display_rowsAux(Rest, N1, 1, MaxSize).
 
-display_rowsAux([Row | Rest], N, 1):-
+display_rowsAux([Row | Rest], N, 1, MaxSize):-
     N > 0,
     write(N), write(' '), 
     display_row(Row), nl,
-    write('| | / | \\ | / | \\ |'), nl,
+    display_lines_row(MaxSize,1), nl,
     N1 is N - 1,
-    display_rowsAux(Rest, N1, 0).
+    display_rowsAux(Rest, N1, 0, MaxSize).
 
 display_row([]).
 display_row([-| []]) :-
@@ -201,6 +207,28 @@ display_row([Char | Rest]) :-
     write('---'),
     display_row(Rest).
 
+display_lines_row(Size, StartPattern) :-
+    write('|'),
+    SizeNo is Size -1,
+    display_line_segments(SizeNo, StartPattern),
+    write(' |').
+
+
+display_line_segments(0, _).
+display_line_segments(N, Pattern) :-
+    N > 0,
+    write(' | '),
+    display_separator(Pattern),
+    NextPattern is 1 - Pattern,
+    N1 is N - 1,
+    display_line_segments(N1, NextPattern).
+
+% display_separator(+Pattern)
+% Displays separator based on current pattern (1 for /, 0 for \)
+display_separator(1) :-
+    write('/').
+display_separator(0) :-
+    write('\\').
 
 % lettermap(+Val, -Char)
 % Maps the Y cord to a letter
