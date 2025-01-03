@@ -456,7 +456,7 @@ value([Board, Next, _, _], Player, Value) :-
     length(OpponentMoves, OpponentMobility),
     MobilityValue is PlayerMobility - OpponentMobility,
 
-    Value is (AmountValue * 1) + (StackValue * 2) + (MobilityValue * 2).
+    Value is (AmountValue * 1) + (StackValue * (-0.5)) + (MobilityValue * 2).
 
 % stack_value(+Board, +Player, -Value)
 % Sums the value of all the stacks of a player by iterating each player piece and getting its value

@@ -126,8 +126,11 @@ display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
     display_movesAux(Rest).
 
 display_winner(Winner) :-
+    nl, nl,
+    write('      '),
     write(Winner),
-    write('wins!'),nl.
+    write(' wins!'),
+    write('      '), nl.
 
   %---------------------------------------------------
 display_rows(Board) :-
