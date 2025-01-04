@@ -102,43 +102,23 @@ test_corners_sight :-
 
 % Tests visibility within a box-shaped region using in_sight/3.
 test_full_box_sight :-
-<<<<<<< HEAD
   testBoard(s3, Board),
-  in_sight([Board, a,0,0], [3,3], Loc1),
+  in_sight([Board, a,0,0], [3,3], Loc1), %intersection
   sort(Loc1, Temp),
   Temp = [[2,2],[2,3],[2,4],[3,2],[3,4],[4,2],[4,3],[4,4]],
-  in_sight([Board, a,0,0], [3,4], Loc2),
+  in_sight([Board, a,0,0], [3,4], Loc2), %non intersection
   sort(Loc2, Temp2),
   Temp2 = [[2,4],[3,3],[3,5],[4,4]].
 
 % Tests visibility from intersection points using in_sight/3.
 test_intersections_sight :-
   testBoard(s4, Board),
-  in_sight([Board, a,0,0], [2,2], Loc1),
+  in_sight([Board, a,0,0], [2,2], Loc1), %intersection
   sort(Loc1, Temp),
   Temp = [[1,1],[1,3],[3,1],[3,3]],
-  in_sight([Board, a,0,0], [3,2], Loc2),
+  in_sight([Board, a,0,0], [3,2], Loc2), % non intersection
   sort(Loc2, Temp2),
-  Temp2 = [[3,1],[3,3]].
-=======
-    testBoard(s3, Board),
-    in_sight([Board, a,0,0], [3,3], Loc1), %intersection
-    sort(Loc1, Temp),
-    Temp = [[2,2],[2,3],[2,4],[3,2],[3,4],[4,2],[4,3],[4,4]],
-    in_sight([Board, a,0,0], [3,4], Loc2), %non intersection
-    sort(Loc2, Temp2),
-    Temp2 = [[2,4],[3,3],[3,5],[4,4]].
-
-% Tests visibility from intersection points using in_sight/3.
-test_intersections_sight :-
-    testBoard(s4, Board),
-    in_sight([Board, a,0,0], [2,2], Loc1), %intersection
-    sort(Loc1, Temp),
-    Temp = [[1,1],[1,3],[3,1],[3,3]],
-    in_sight([Board, a,0,0], [3,2], Loc2), % non intersection
-    sort(Loc2, Temp2),
-    Temp2 = [[3,1],[3,3]]. % right above and bellow
->>>>>>> 4a42e3a95b328b31bb636d8748ea2e4b87fe07a1
+  Temp2 = [[3,1],[3,3]]. % right above and bellow
 
 %=======================================================================================================%
 % Runs a series of tests for different board scenarios to ensure correctness of valid_moves/2.
@@ -160,21 +140,21 @@ valid_moves1 :-
 valid_moves2 :-
   testBoard(2,Testboard),
   find_biggest_stacks(Testboard, a, Positions, _),
-  Positions = [[2,4]],
+    Positions = [[2,4]],
   find_biggest_stacks(Testboard, b, Positions2, _),
-  Positions2 = [[3,2],[4,2]],
+    Positions2 = [[3,2],[4,2]],
 
   valid_moves([Testboard, b,0,0], Positions3),
-  Positions3 = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]]
-,[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]]
-,[[0,0],[2,2]],[[0,0],[5,2]],[[0,0],[1,3]]
-,[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]]
-,[[0,0],[1,4]],[[0,0],[3,4]],[[0,0],[4,4]]
-,[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]]
-,[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]],
-  valid_moves([Testboard, a,0,0], Positions4),
-  Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
-,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
+    Positions3 = [[[0,0],[1,1]],[[0,0],[2,1]],[[0,0],[3,1]]
+                ,[[0,0],[4,1]],[[0,0],[5,1]],[[0,0],[1,2]]
+                ,[[0,0],[2,2]],[[0,0],[5,2]],[[0,0],[1,3]]
+                ,[[0,0],[2,3]],[[0,0],[4,3]],[[0,0],[5,3]]
+                ,[[0,0],[1,4]],[[0,0],[3,4]],[[0,0],[4,4]]
+                ,[[0,0],[5,4]],[[0,0],[1,5]],[[0,0],[2,5]]
+                ,[[0,0],[3,5]],[[0,0],[4,5]],[[0,0],[5,5]]],
+    valid_moves([Testboard, a,0,0], Positions4),
+      Positions4 = [[[2,4],[1,3]],[[2,4],[1,4]],[[2,4],[1,5]]
+                  ,[[2,4],[2,3]],[[2,4],[2,5]],[[2,4],[3,4]],[[2,4],[3,5]]].
 
 % Verifies specific move generation on testBoard(3) (1-a3, 2-b3, 5-other pieces) for both players 'a' and 'b'.
 valid_moves3 :-
