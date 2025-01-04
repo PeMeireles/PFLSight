@@ -68,8 +68,9 @@ display_start_menu :-
   write('What mode you want to play?'),nl,
   write('1 - player vs player'),nl,
   write('2 - player vs computer'),nl,
-  write('3 - computer vs computer'),nl,
-  write('4 - test font'),nl.
+  write('3 - computer vs player'),nl,
+  write('4 - computer vs computer'),nl,
+  write('5 - test font'),nl.
 
 display_menu(computer) :-
   write('The computer should be:'),nl,
