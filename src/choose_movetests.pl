@@ -5,6 +5,7 @@ run_choose_move_tests :-
     test_level1_randomness,
     test_level2_best_move,
     test_level2_no_valid_moves,
+    test_level3_killer_move,
     write('all choose_move tests done'), nl.
 
 % Tests that the choose_move/3 predicate for player level 1 returns a valid move from the list of valid moves.
@@ -40,6 +41,12 @@ test_level2_no_valid_moves :-
     game_over([Board, a, 0, 0], Winner),
     Winner \= 0,
     write('level 2 no valid moves test passed'),nl.
+
+test_level3_killer_move :-
+    Testboard = [[-,-,-,-,-],[-,-,-,-,-],[-,-,-,-,-],[-,b1,-,-,-],[a2,a1,-,-,-]],
+    choose_move([Testboard, b, 3,3],3, ChosenMove),
+    ChosenMove = [[0,0],[1,2]],
+    write('level 3 test passed'),nl.
 
 
 

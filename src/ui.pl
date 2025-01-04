@@ -38,7 +38,7 @@ get_ai_type(Type) :-
     repeat,
     display_menu(computer),
     read(Type),
-    validate_choice(Type, [1,2]), !.
+    validate_choice(Type, [1,2,3]), !.
 
 % read_player_input(-Position, +Moves)
 % Reads and processes player input

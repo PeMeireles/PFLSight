@@ -77,7 +77,8 @@ display_start_menu :-
 display_menu(computer) :-
   write('The computer should be:'),nl,
   write('1 - random'), nl,
-  write('2 - smart'), nl.
+  write('2 - smart'), nl,
+  write('3 - smarter'),nl.
 
 % display_board_size_menu/0
 % Displays board size selection menu

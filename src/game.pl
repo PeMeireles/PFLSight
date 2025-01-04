@@ -452,7 +452,8 @@ choose_move(GameState, 1, Move) :-
     valid_moves(GameState, Moves),
     random_member(Move, Moves).
 
-choose_move(GameState, 2, BestMove) :-
+choose_move(GameState, AI, BestMove) :-
+    (AI = 2 ; AI = 3),
     valid_moves(GameState, Moves),
     find_best_move(GameState, Moves, BestMove).
 
@@ -474,13 +475,25 @@ find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
 % returning the BestMove.
 find_best_move_aux(_, [], BestMove, _, BestMove).
 
+find_best_move_aux([Board, Next, P1, P2], [Move|_], _, _, Move) :-
+    (P1 = 3 ; P2 = 3),
+    move([Board, Next, P1, P2], Move, NewState),
+    game_over(NewState, Next), !.
+
 find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
     move([Board, Next, P1, P2], Move, NewState),
     value(NewState, Next, NewValue),
-    (  NewValue > CurrentBestValue
-    -> find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, NewValue, BestMove)
-    ;  find_best_move_aux([Board, Next, P1, P2], RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
-    ).
+    select_better_move([Board, Next, P1, P2], RestMoves, Move, NewValue, CurrentBestMove, CurrentBestValue, BestMove).
+
+% select_better_move(+GameState, +RestMoves, +Move, +NewValue, +CurrentBestMove, +CurrentBestValue, -BestMove)
+% Selects the better move based on value comparison and continues search
+select_better_move(GameState, RestMoves, Move, NewValue, _, CurrentBestValue, BestMove) :-
+    NewValue > CurrentBestValue, !,
+    find_best_move_aux(GameState, RestMoves, Move, NewValue, BestMove).
+
+select_better_move(GameState, RestMoves, _, _, CurrentBestMove, CurrentBestValue, BestMove) :-
+    find_best_move_aux(GameState, RestMoves, CurrentBestMove, CurrentBestValue, BestMove).
+
   
 % value(+GameState, +Player, -Value)
 % Receives the current game state and returns a value measuring how good/bad the current game state is to the given Player, by calculating different metrics
