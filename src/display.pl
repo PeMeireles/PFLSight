@@ -146,9 +146,13 @@ display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
 display_winner(Winner) :-
   playerName(Winner,WinnerName),
   nl, nl,
-  write('   '),
-  write(WinnerName),
-  write(' wins!'),nl.
+  write('#=================================#'),nl, 
+  write('||          GAME FINISH!         ||'),nl,
+  write('||                               ||'),nl,
+  write('||         '),write(WinnerName), write(' WINS         ||'),nl,
+  write('||                               ||'),nl,
+  write('||      Thanks for playing!      ||'),nl,
+  write('#=================================#').
 
 %---------------------------------------------------
 % display_rows(+Board)
