@@ -18,7 +18,7 @@ get_valid_choice(Choice) :-
     clear_screen,
     display_start_menu,
     read(Choice),
-    validate_choice(Choice, [1,2,3,4]), !.
+    validate_choice(Choice, [1,2,3,4,5]), !.
 
 % setup_game_options(+Choice, -Options)
 % Sets up game options based on menu choice
@@ -29,13 +29,17 @@ setup_game_options(2, (Size, 0, AIType)) :-
     maybe_get_board_size(Size),
     get_ai_type(AIType).
 
-setup_game_options(3, (Size, AI1, AI2)) :-
+setup_game_options(3, (Size, AIType, 0)) :-
+    maybe_get_board_size(Size),
+    get_ai_type(AIType).
+
+setup_game_options(4, (Size, AI1, AI2)) :-
     maybe_get_board_size(Size),
     get_ai_type(AI1),
     write('And for the second one.'), nl,
     get_ai_type(AI2).
 
-setup_game_options(4, _) :-
+setup_game_options(5, _) :-
     test_piece_display,
     fail.
 
@@ -44,13 +48,12 @@ setup_game_options(4, _) :-
 maybe_get_board_size(Size) :-
     write('Change board size? (y/n): '),
     read(Response),
+    atom(Response),
     handle_size_response(Response, Size).
 
 % handle_size_response(+Response, -Size)
 % Handles user response for board size
 handle_size_response(y, Size) :- !,
-    get_board_size(Size).
-handle_size_response(Y, Size) :- !,
     get_board_size(Size).
 handle_size_response(_, 5).  % default size
 
