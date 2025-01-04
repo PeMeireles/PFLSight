@@ -49,6 +49,98 @@ start_game(Options) :-
     initial_state(Options, GameState),
     game_loop(GameState).
 
+<<<<<<< HEAD
+=======
+% game_loop(+GameState)
+% Main game loop orchestrating game flow
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
+game_loop(Gamestate) :-
+    repeat,
+        valid_moves(Gamestate, Moves),
+        display_game(Gamestate),
+        (handle_move(Gamestate, Moves, NewState) ->
+            handle_game_state(NewState)
+        ;   
+            handle_invalid_move,
+            game_loop(Gamestate)
+        ).
+
+% handle_game_state(+GameState)
+% Processes game state after move
+% Checks for winner or continues game
+handle_game_state([Board, Next, P1, P2]) :-
+    game_over([Board, Next, _, _], Winner),
+    (Winner \= 0 ->
+        display_rows(Board),
+
+        display_winner(Winner), !
+    ;   
+        game_loop([Board, Next, P1, P2])
+    ).
+
+% handle_invalid_move/0
+% Handles invalid move input
+handle_invalid_move :-
+    write('Invalid move. Try again.'), nl,
+    wait_for_enter,
+    clear_screen.
+
+
+% handle_move(+GameState, +ValidMoves, -NewState)
+% Handles move input based on game state and AIType
+handle_move([Board, a, 0, P2], Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, [Board, a, 0, P2], Moves, NewState).
+
+handle_move([Board, b, P1, 0], Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, [Board, b, P1, 0], Moves, NewState).
+    
+handle_move([Board, a, P1, P2], Moves, NewState) :-
+    choose_move([Board, a, P1, P2], P1 , Move),
+    move([Board, a, P1, P2], Move,NewState),
+    wait_for_enter.
+
+
+handle_move([Board, b, P1, P2], Moves, NewState) :-
+    choose_move([Board, b, P1, P2], P2 , Move),
+    move([Board, b, P1, P2], Move,NewState),
+    wait_for_enter.
+
+    
+
+% handle_new_piece(+GameState, +ValidMoves, -NewState)
+% Handles moves when no stacks present
+execute_move(new_piece, Gamestate, Moves, NewState) :-
+    display_new_piece,
+    read_player_input(Pos1, Moves),
+    move_pre_val(Gamestate, [[0,0], Pos1], NewState, Moves).
+
+
+% handle_regular_move(+GameState, +ValidMoves, -NewState)
+% Handles moves when stacks are present
+execute_move(stack, Gamestate, Moves, NewState) :-
+    display_stack_drop,
+    read_player_input(Pos1, Moves),
+    validate_valid_stack(Pos1, Moves),
+    display_target_menu,
+    read_player_input(Pos2, Moves),
+    move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
+ 
+% validate_valid_stack(+Origin, +ValidMoves)
+% Validates if Origin position is a valid stack to move from
+% Origin: [Row,Col] position to validate
+% ValidMoves: List of [[From,To]] valid moves
+% Fails with message if Origin is not a valid stack position
+validate_valid_stack(_, []) :-
+  write('Select a valid stack'),nl,
+  false.
+
+validate_valid_stack(Origin, [[Origin, _] | _ ]) :-!.
+validate_valid_stack(Origin, [_ | T]) :-
+    validate_valid_stack(Origin, T).
+
+>>>>>>> 4a42e3a95b328b31bb636d8748ea2e4b87fe07a1
 % initial_state(+Config, -GameState)
 % Creates initial game state from configuration
 % Config: (Size, P1, P2) where:

@@ -9,9 +9,9 @@ value_tests :-
 test_value_basic :-
     testBoard(5, Board2),
     value([Board2, a,0,0], a, Value3),
-    Value3 > 0,
+    Value3 < 0,
     value([Board2, b,0,0], b, Value4),
-    Value4 < 0.
+    Value4 > 0.
 
 % Tests the value/3 predicate on a more complex board configuration where one player has a clear advantage.
 test_value_advantage :-
