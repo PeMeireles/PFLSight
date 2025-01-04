@@ -1,4 +1,5 @@
 :- consult(display).
+:- consult(ui).
 :- use_module(library(between)).
 :- use_module(library(lists)).
 :- use_module(library(random)).
@@ -9,16 +10,6 @@ play :-
     get_valid_choice(Choice),
     setup_game_options(Choice, Options),
     start_game(Options).
-
-
-% get_valid_choice(-Choice)
-% Gets and validates menu choice
-get_valid_choice(Choice) :-
-    repeat,
-    clear_screen,
-    display_start_menu,
-    read(Choice),
-    validate_choice(Choice, [1,2,3,4,5]), !.
 
 % setup_game_options(+Choice, -Options)
 % Sets up game options based on menu choice
@@ -43,47 +34,11 @@ setup_game_options(5, _) :-
     test_piece_display,
     fail.
 
-% maybe_get_board_size(-Size)
-% Optionally gets board size, defaults to 5
-maybe_get_board_size(Size) :-
-    write('Change board size? (y/n): '),
-    read(Response),
-    atom(Response),
-    handle_size_response(Response, Size).
-
-% handle_size_response(+Response, -Size)
-% Handles user response for board size
-handle_size_response(y, Size) :- !,
-    get_board_size(Size).
-handle_size_response(_, 5).  % default size
-
-% get_board_size(-Size)
-% Gets and validates board size selection
-get_board_size(Size) :-
-    repeat,
-    display_board_size_menu,
-    read(Size),
-    validate_board_size(Size), !.
-
 % validate_board_size(+Size)
 % Validates if size is odd and within bounds
 validate_board_size(Size) :-
     Size mod 2 =:= 1,
     between(5, 9, Size).
-
-% get_ai_type(-Type)
-% Gets and validates AI type selection
-get_ai_type(Type) :-
-    repeat,
-    display_menu(computer),
-    read(Type),
-    validate_choice(Type, [1,2]), !.
-
-% test_piece_display/0
-% Tests piece display functionality
-test_piece_display :-
-    write('If this character is a 4 stack white piece, it\'s working: P'), nl,
-    wait_for_enter.
 
 % start_game(+Options)
 % Initializes and starts game with given configuration
@@ -93,96 +48,6 @@ test_piece_display :-
 start_game(Options) :-
     initial_state(Options, GameState),
     game_loop(GameState).
-
-% game_loop(+GameState)
-% Main game loop orchestrating game flow
-% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
-game_loop(Gamestate) :-
-    repeat,
-        valid_moves(Gamestate, Moves),
-        display_game(Gamestate),
-        (handle_move(Gamestate, Moves, NewState) ->
-            handle_game_state(NewState)
-        ;   
-            handle_invalid_move,
-            game_loop(Gamestate)
-        ).
-
-% handle_game_state(+GameState)
-% Processes game state after move
-% Checks for winner or continues game
-handle_game_state([Board, Next, P1, P2]) :-
-    game_over([Board, Next, _, _], Winner),
-    (Winner \= 0 ->
-        display_rows(Board),
-
-        display_winner(Winner), !
-    ;   
-        game_loop([Board, Next, P1, P2])
-    ).
-
-% handle_invalid_move/0
-% Handles invalid move input
-handle_invalid_move :-
-    write('Invalid move. Try again.'), nl,
-    wait_for_enter,
-    clear_screen.
-
-
-% handle_move(+GameState, +ValidMoves, -NewState)
-% Handles move input based on game state and AIType
-handle_move([Board, a, 0, P2], Moves, NewState) :-
-    move_type(Moves, Type),
-    execute_move(Type, [Board, a, 0, P2], Moves, NewState).
-
-handle_move([Board, b, P1, 0], Moves, NewState) :-
-    move_type(Moves, Type),
-    execute_move(Type, [Board, b, P1, 0], Moves, NewState).
-    
-handle_move([Board, a, P1, P2], Moves, NewState) :-
-    choose_move([Board, a, P1, P2], P1 , Move),
-    move([Board, a, P1, P2], Move,NewState),
-    wait_for_enter.
-
-
-handle_move([Board, b, P1, P2], Moves, NewState) :-
-    choose_move([Board, b, P1, P2], P2 , Move),
-    move([Board, b, P1, P2], Move,NewState),
-    wait_for_enter.
-
-    
-
-% handle_new_piece(+GameState, +ValidMoves, -NewState)
-% Handles moves when no stacks present
-execute_move(new_piece, Gamestate, Moves, NewState) :-
-    display_new_piece,
-    read_player_input(Pos1, Moves),
-    move_pre_val(Gamestate, [[0,0], Pos1], NewState, Moves).
-
-
-% handle_regular_move(+GameState, +ValidMoves, -NewState)
-% Handles moves when stacks are present
-execute_move(stack, Gamestate, Moves, NewState) :-
-    display_stack_drop,
-    read_player_input(Pos1, Moves),
-    validate_valid_stack(Pos1, Moves),
-    display_target_menu,
-    read_player_input(Pos2, Moves),
-    move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
- 
-% validate_valid_stack(+Origin, +ValidMoves)
-% Validates if Origin position is a valid stack to move from
-% Origin: [Row,Col] position to validate
-% ValidMoves: List of [[From,To]] valid moves
-% Fails with message if Origin is not a valid stack position
-validate_valid_stack(_, []) :-
-  write('Select a valid stack'),nl,
-  false.
-
-validate_valid_stack(Origin, [[Origin, _] | _ ]) :-!.
-
-validate_valid_stack(Origin, [_ | T]) :-
-    validate_valid_stack(Origin, T).
 
 % initial_state(+Config, -GameState)
 % Creates initial game state from configuration
@@ -228,6 +93,20 @@ board_position(Board, Row, Col):-
     length(Board, Size),
     check_board_position(Size, Row, Col).
 
+% game_loop(+GameState)
+% Main game loop orchestrating game flow
+% GameState: [Board, Next, P1, P2], current board state, next player and AITypes
+game_loop(Gamestate) :-
+    repeat,
+    valid_moves(Gamestate, Moves),
+    display_game(Gamestate),
+    (handle_move(Gamestate, Moves, NewState) ->
+        handle_game_state(NewState)
+    ;   
+        handle_invalid_move,
+        game_loop(Gamestate)
+    ).
+
 % valid_moves(+GameState, -ValidMoves)
 % Determines all valid moves for current player
 % GameState: [Board, Next, P1, P2], current board state, next player and AITypes
@@ -249,11 +128,11 @@ valid_moves([Board, Next, _, _], Positions) :-
 % - Height > 1: Moves from stack positions to adjacent empty positions
 valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
-  empty_moves(Board, Positions).
+  empty_moves(Board, Positions), !. % Necessary to stop matching on _ when backtracking do to a false
 
 valid_movesAux(Board, 1,_, Positions) :-
   % Every Position without a piece is valid 
-  empty_moves(Board, Positions).
+  empty_moves(Board, Positions), !. % Necessary to stop matching on _ when backtracking do to a false
 
 valid_movesAux(Board, _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
@@ -390,6 +269,57 @@ switch_player(b, a).
 firstpiece(a, a1).
 firstpiece(b, b1).
 
+% handle_move(+GameState, +ValidMoves, -NewState)
+% Handles move input based on game state and AIType
+handle_move([Board, a, 0, P2], Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, [Board, a, 0, P2], Moves, NewState).
+
+handle_move([Board, b, P1, 0], Moves, NewState) :-
+    move_type(Moves, Type),
+    execute_move(Type, [Board, b, P1, 0], Moves, NewState).
+    
+handle_move([Board, a, P1, P2], Moves, NewState) :-
+    choose_move([Board, a, P1, P2], P1 , Move),
+    move([Board, a, P1, P2], Move,NewState),
+    wait_for_enter.
+
+handle_move([Board, b, P1, P2], Moves, NewState) :-
+    choose_move([Board, b, P1, P2], P2 , Move),
+    move([Board, b, P1, P2], Move,NewState),
+    wait_for_enter.
+
+% handle_new_piece(+GameState, +ValidMoves, -NewState)
+% Handles moves when no stacks present
+execute_move(new_piece, Gamestate, Moves, NewState) :-
+    display_new_piece,
+    read_player_input(Pos1, Moves),
+    move_pre_val(Gamestate, [[0,0], Pos1], NewState, Moves).
+
+% handle_regular_move(+GameState, +ValidMoves, -NewState)
+% Handles moves when stacks are present
+execute_move(stack, Gamestate, Moves, NewState) :-
+    display_stack_drop,
+    read_player_input(Pos1, Moves),
+    validate_valid_stack(Pos1, Moves),
+    display_target_menu,
+    read_player_input(Pos2, Moves),
+    move_pre_val(Gamestate, [Pos1, Pos2], NewState, Moves).
+
+% validate_valid_stack(+Origin, +ValidMoves)
+% Validates if Origin position is a valid stack to move from
+% Origin: [Row,Col] position to validate
+% ValidMoves: List of [[From,To]] valid moves
+% Fails with message if Origin is not a valid stack position
+validate_valid_stack(_, []) :-
+  write('Select a valid stack'),nl,
+  false.
+
+validate_valid_stack(Origin, [[Origin, _] | _ ]).
+
+validate_valid_stack(Origin, [_ | T]) :-
+    validate_valid_stack(Origin, T).
+
 % move(+GameState, +Move, -NewGameState)
 % Executes a game move and updates the game state
 % GameState: [Board, Next, P1, P2], where Board is current board and Next is next player (the one taking action) and AITypes
@@ -419,7 +349,7 @@ move_pre_val([Board, Next, P1, P2], [Origin,Target],[NewBoard, NewNext, P1, P2],
   replace_on_board(Board2, Target, Piece, Board3),
   change_start_piece(Board3, Origin, NewBoard),
   switch_player(Next, NewNext).
-  
+
 % add1topos(+Board, +PosList, -FinalBoard)
 % Increments the numeric part of cell values at given positions
 % Board: Current game board state
@@ -439,20 +369,19 @@ add1topos(Board, [[X,Y]|Rest], FinalBoard) :-
 
     replace_on_board(Board, [X,Y], NewVal, TempBoard),
     add1topos(TempBoard, Rest, FinalBoard).
-  
+
 % Similar to add1topos
 % When position [0,0] no changes
 change_start_piece(Board,[0,0], Board).
+
 change_start_piece(Board, [X,Y], FinalBoard) :-
-  access_board(Board, [X,Y], Val),
-
-  atom_chars(Val, [Player|NumC]),
-  number_chars(Num, NumC),
-  NewNum is Num - 2,
-  number_chars(NewNum, NewNumC),
-  atom_chars(NewVal, [Player|NewNumC]),
-
-  replace_on_board(Board, [X,Y], NewVal, FinalBoard).
+    access_board(Board, [X,Y], Val),
+    atom_chars(Val, [Player|NumC]),
+    number_chars(Num, NumC),
+    NewNum is Num - 2,
+    number_chars(NewNum, NewNumC),
+    atom_chars(NewVal, [Player|NewNumC]),
+    replace_on_board(Board, [X,Y], NewVal, FinalBoard).
 
 % replace_on_board(+Board, +Position, +Value, -NewBoard)
 % Replaces a value at specified position in the game board
@@ -462,11 +391,11 @@ change_start_piece(Board, [X,Y], FinalBoard) :-
 % FinalBoard: Resulting board after replacement
 % Note: Y coordinate is inverted (6-Y) due to board representation, no need to check if X and Y are between (1-5) since its validated before
 replace_on_board(Board, [X,Y], Val, FinalBoard) :-
-  length(Board, Size),
-  Y1 is Size +1 -Y,
-  nth1(Y1, Board, OldRow),
-  replace_nth(OldRow, Val, NewRow, X),
-  replace_nth(Board, NewRow, FinalBoard, Y1).
+    length(Board, Size),
+    Y1 is Size +1 -Y,
+    nth1(Y1, Board, OldRow),
+    replace_nth(OldRow, Val, NewRow, X),
+    replace_nth(Board, NewRow, FinalBoard, Y1).
 
 % replace_nth(+List, +NewValue, -NewList, +Position)
 % Replaces element at Position in List with NewValue
@@ -477,10 +406,83 @@ replace_on_board(Board, [X,Y], Val, FinalBoard) :-
 % X: Index where to place new value (1-based)
 % Uses append to split and rejoin list around the replacement point based on list_slice/del practical class 3
 replace_nth(Row1, NewVal, NewRow, X) :-
-  X1 is X -1,
-  length(Pref,X1),
-  append(Pref, [_ | Suff],Row1),
-  append(Pref, [NewVal | Suff], NewRow).
+    X1 is X -1,
+    length(Pref,X1),
+    append(Pref, [_ | Suff],Row1),
+    append(Pref, [NewVal | Suff], NewRow).
+
+% handle_game_state(+GameState)
+% Processes game state after move
+% Checks for winner or continues game
+handle_game_state([Board, Next, P1, P2]) :-
+    game_over([Board, Next, _, _], Winner),
+    (Winner \= 0 ->
+        clear_screen,
+        display_rows(Board),
+
+        display_winner(Winner), !
+    ;   
+        game_loop([Board, Next, P1, P2])
+    ).
+
+% game_over(+GameState, -Winner)
+% Determines if game is over and who won
+% GameState: [Board, Next, _, _] current board and player to move
+% Winner: Player who won the game
+% Game is over when current player has no valid moves, losing the game
+game_over([Board, Next, _, _], Winner) :-
+    valid_moves([Board, Next, _, _], Positions),
+    game_overAux(Next, Positions, Winner).
+
+game_overAux(Next, [], Winner):-
+    switch_player(Next, Winner).
+
+game_overAux(Next, Moves, 0).
+
+% check_no_stacks(+Moves)
+% Checks if moves start from position [0,0] (new piece placement)
+% Moves: List of [[FromPos,ToPos]|Rest] valid moves
+check_no_stacks([ [FPos | _] |_]) :-
+    FPos = [0,0].
+
+% choose_move(+GameState, +Level, -Move)
+% Selects a move for the given computer player based on the current GameState.
+% If the computer is random (level 1), a random valid move is chosen, if the 
+% computer is smart (level 2), the best move is selected based on the evaluation 
+% of game states (uses the value function).
+choose_move(GameState, 1, Move) :-
+    valid_moves(GameState, Moves),
+    random_member(Move, Moves).
+
+choose_move(GameState, 2, BestMove) :-
+    valid_moves(GameState, Moves),
+    find_best_move(GameState, Moves, BestMove).
+
+% find_best_move(+GameState, +Moves, -BestMove)
+% Evaluates each move in the list of Moves for the given GameState and returns the move with the highest value.
+% Simulates each move and computes the resulting game state, then uses the value/3 predicate to calculate the
+% heuristic value of each resulting game state, and % finally calls find_best_move_aux/5 to iterate over all
+% remaining moves and find the optimal one.
+find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
+    move([Board, Next, P1, P2], Move, NewState),
+    value(NewState,Next,Value),
+    find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, Value, BestMove).
+
+% find_best_move_aux(+GameState, +Moves, +CurrentBestMove, +CurrentBestValue, -BestMove)
+% Helper predicate that recursively (tail recursion) evaluates a list of moves to find the best one.
+% For each move, it simulates the game state and calculates its heuristic value, then compares the 
+% value of the current move with the CurrentBestValue, it updates CurrentBestMove if a better move 
+% is found and continues the recursion, finally, it ends recursion when there are no more moves left,
+% returning the BestMove.
+find_best_move_aux(_, [], BestMove, _, BestMove).
+
+find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
+    move([Board, Next, P1, P2], Move, NewState),
+    value(NewState, Next, NewValue),
+    (  NewValue > CurrentBestValue
+    -> find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, NewValue, BestMove)
+    ;  find_best_move_aux([Board, Next, P1, P2], RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
+    ).
   
 % value(+GameState, +Player, -Value)
 % Receives the current game state and returns a value measuring how good/bad the current game state is to the given Player, by calculating different metrics
@@ -494,7 +496,6 @@ replace_nth(Row1, NewVal, NewRow, X) :-
 % OpponentMobility: Number of available valid moves the opponent has on the board
 % MobilityValue: Value of a current game state according to amount of available valid moves
 % Value: Overall value of a current game state (using the previously calculated values, with different levels of "importance")
-
 
 value([Board, Next, _, _], Player, Value) :-
     player_pieces(Board, Player, PlayerPieces),
@@ -526,72 +527,11 @@ stack_value(Board, Player, Value):-
     findall(StackValue, (member((_,_,StackValue), Positions)), Values),
     sumlist(Values, Value).
 
-% game_over(+GameState, -Winner)
-% Determines if game is over and who won
-% GameState: [Board, Next, _, _] current board and player to move
-% Winner: Player who won the game
-% Game is over when current player has no valid moves, losing the game
-game_over([Board, Next, _, _], Winner) :-
-    valid_moves([Board, Next, _, _], Positions),
-    game_overAux(Next, Positions, Winner).
-
-game_overAux(Next, [], Winner):-
-    switch_player(Next, Winner).
-
-game_overAux(Next, Moves, 0).
-
-% check_no_stacks(+Moves)
-% Checks if moves start from position [0,0] (new piece placement)
-% Moves: List of [[FromPos,ToPos]|Rest] valid moves
-check_no_stacks([ [FPos | _] |_]) :-
-    FPos = [0,0].
-
-
-% move_type(+Moves, -Type)
-% Determines move type based on valid moves
-% Type: new_piece if placing new piece, stack if moving existing piece
-move_type(Moves, new_piece) :-
-  check_no_stacks(Moves),!.
-move_type(_, stack).
-
-% read_player_input(-Position, +Moves)
-% Reads and processes player input
-% Position: Resulting board position
-% Moves: List of valid moves
-read_player_input(Pos, Moves) :-
-  read(Input),
-  atom(Input),
-  handle_input(Input, Pos, Moves).
-
-% handle_input(+Input, -Position, +Moves)
-% Processes different types of input (commands or positions)
-handle_input(v,Pos, Moves) :-
-  display_moves(Moves),
-  read_player_input(Pos, Moves), !.
-
-handle_input(x, _, _) :-
-  halt.
-
-handle_input(Input,Pos, Moves) :-
-  valid_chess_coord(Input),
-  coords_to_pos(Input, Pos).
-
-% coords_to_pos(+Atom, -Tuple)
-% Converts chess notation to tuple coordinates
-coords_to_pos(ChessCoord, [X,Y]) :-
-    atom(ChessCoord),
-    atom_chars(ChessCoord, [Letter|NumberChars]),
-    char_code(Letter, Code),
-    X is Code - 96,
-    number_chars(Y, NumberChars).
-
-
 % valid_chess_letter(+Letter)
 % Checks if the given letter is a valid chess coordinate letter
 valid_chess_letter(Letter) :-
     char_code(Letter, Code),
     between(97,122,Code).
-
 
 % valid_chess_coord(+ChessCoord)
 % Validates if the input is a valid chess coordinate
@@ -599,44 +539,3 @@ valid_chess_coord(ChessCoord) :-
     atom_chars(ChessCoord, [Letter|NumberChars]),
     valid_chess_letter(Letter),
     NumberChars \= [].
-
-% choose_move(+GameState, +Level, -Move)
-% Selects a move for the given computer player based on the current GameState.
-% If the computer is random (level 1), a random valid move is chosen, if the 
-% computer is smart (level 2), the best move is selected based on the evaluation 
-% of game states (uses the value function).
-
-choose_move(GameState, 1, Move) :-
-  valid_moves(GameState, Moves),
-  random_member(Move, Moves).
-
-choose_move(GameState, 2, BestMove) :-
-  valid_moves(GameState, Moves),
-  find_best_move(GameState, Moves, BestMove).
-
-% find_best_move(+GameState, +Moves, -BestMove)
-% Evaluates each move in the list of Moves for the given GameState and returns the move with the highest value.
-% Simulates each move and computes the resulting game state, then uses the value/3 predicate to calculate the
-% heuristic value of each resulting game state, and % finally calls find_best_move_aux/5 to iterate over all
-% remaining moves and find the optimal one.
-
-find_best_move([Board, Next, P1, P2], [Move|RestMoves], BestMove) :-
-  move([Board, Next, P1, P2], Move, NewState),
-  value(NewState,Next,Value),
-  find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, Value, BestMove).
-
-% find_best_move_aux(+GameState, +Moves, +CurrentBestMove, +CurrentBestValue, -BestMove)
-% Helper predicate that recursively (tail recursion) evaluates a list of moves to find the best one.
-% For each move, it simulates the game state and calculates its heuristic value, then compares the 
-% value of the current move with the CurrentBestValue, it updates CurrentBestMove if a better move 
-% is found and continues the recursion, finally, it ends recursion when there are no more moves left,
-% returning the BestMove.
-
-find_best_move_aux(_, [], BestMove, _, BestMove).
-find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, CurrentBestValue, BestMove) :-
-  move([Board, Next, P1, P2], Move, NewState),
-  value(NewState, Next, NewValue),
-  (  NewValue > CurrentBestValue
-  -> find_best_move_aux([Board, Next, P1, P2], RestMoves, Move, NewValue, BestMove)
-  ;  find_best_move_aux([Board, Next, P1, P2], RestMoves, CurrentBestMove, CurrentBestValue, BestMove)
-  ).

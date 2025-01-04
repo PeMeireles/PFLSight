@@ -68,45 +68,45 @@ in_sight5 :-
 
 % Tests visibility from positions near the board edges using in_sight/3.
 test_edges_sight :-
-    testBoard(s1, Board),
-    in_sight([Board, a, 0,0], [3,1], Loc1),
-    sort(Loc1,Temp),
-    Temp = [[1,1],[2,2],[3,5],[4,2],[5,1]],
-    in_sight([Board, a,0,0], [1,3], Loc2),
-    sort(Loc2, Temp2),
-    Temp2 = [[1,1],[1,5],[2,2],[2,4],[5,3]].
+  testBoard(s1, Board),
+  in_sight([Board, a, 0,0], [3,1], Loc1),
+  sort(Loc1,Temp),
+  Temp = [[1,1],[2,2],[3,5],[4,2],[5,1]],
+  in_sight([Board, a,0,0], [1,3], Loc2),
+  sort(Loc2, Temp2),
+  Temp2 = [[1,1],[1,5],[2,2],[2,4],[5,3]].
 
 % Tests visibility from corner positions using in_sight/3.
 test_corners_sight :-
-    testBoard(s2, Board),
-    in_sight([Board, a,0,0], [1,1], Loc1),
-    sort(Loc1,Temp),
-    Temp = [[1,3],[2,2],[3,1]],
-    in_sight([Board, a,0,0], [5,5], Loc2),
-    sort(Loc2,Temp2),
-    Temp2 = [[3,5],[4,4],[5,3]],
-    in_sight([Board, a,0,0], [5,2], Loc3),
-    sort(Loc3,Temp3),
-    Temp3 = [[4,2],[5,1],[5,3]].
+  testBoard(s2, Board),
+  in_sight([Board, a,0,0], [1,1], Loc1),
+  sort(Loc1,Temp),
+  Temp = [[1,3],[2,2],[3,1]],
+  in_sight([Board, a,0,0], [5,5], Loc2),
+  sort(Loc2,Temp2),
+  Temp2 = [[3,5],[4,4],[5,3]],
+  in_sight([Board, a,0,0], [5,2], Loc3),
+  sort(Loc3,Temp3),
+  Temp3 = [[4,2],[5,1],[5,3]].
 
 % Tests visibility within a box-shaped region using in_sight/3.
 test_full_box_sight :-
-    testBoard(s3, Board),
-    in_sight([Board, a,0,0], [3,3], Loc1),
-    sort(Loc1, Temp),
-    Temp = [[2,2],[2,3],[2,4],[3,2],[3,4],[4,2],[4,3],[4,4]],
-    in_sight([Board, a,0,0], [3,4], Loc2),
-    sort(Loc2, Temp2),
-    Temp2 = [[2,4],[3,3],[3,5],[4,4]].
+  testBoard(s3, Board),
+  in_sight([Board, a,0,0], [3,3], Loc1),
+  sort(Loc1, Temp),
+  Temp = [[2,2],[2,3],[2,4],[3,2],[3,4],[4,2],[4,3],[4,4]],
+  in_sight([Board, a,0,0], [3,4], Loc2),
+  sort(Loc2, Temp2),
+  Temp2 = [[2,4],[3,3],[3,5],[4,4]].
 
 % Tests visibility from intersection points using in_sight/3.
 test_intersections_sight :-
-    testBoard(s4, Board),
-    in_sight([Board, a,0,0], [2,2], Loc1),
-    sort(Loc1, Temp),
-    Temp = [[1,1],[1,3],[3,1],[3,3]],
-    in_sight([Board, a,0,0], [3,2], Loc2),
-    sort(Loc2, Temp2),
-    Temp2 = [[3,1],[3,3]].
+  testBoard(s4, Board),
+  in_sight([Board, a,0,0], [2,2], Loc1),
+  sort(Loc1, Temp),
+  Temp = [[1,1],[1,3],[3,1],[3,3]],
+  in_sight([Board, a,0,0], [3,2], Loc2),
+  sort(Loc2, Temp2),
+  Temp2 = [[3,1],[3,3]].
 
 

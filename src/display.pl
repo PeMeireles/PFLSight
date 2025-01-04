@@ -7,20 +7,21 @@ board(Num, Board) :-
   genBoard(Num, Board, Row, []).
 
 genRow(0, Row, Row).
+
 genRow(Num, Row, Acc) :-
   Num > 0,
   N1 is Num -1,
   genRow(N1, Row, ['-'|Acc]).
 
 genBoard(0, Board, Row, Board).
+
 genBoard(Num, Board, Row, Acc) :-
   Num > 0,
   N1 is Num -1,
   genBoard(N1, Board, Row, [Row|Acc]).
 
-playerName(a,'Contestant1').
-playerName(b,'Contestant2').
-
+playerName(a,'player 1').
+playerName(b,'player 2').
 
 lettermap(a1,'K').
 lettermap(a2,'V').
@@ -49,7 +50,7 @@ wait_for_enter :-
 % \e[H moves cursor to top-left corner
 % \e[2J erases entire screen
 clear_screen :-
-    write('\e[H\e[2J').
+  write('\e[H\e[2J').
 
 % -----------------------------------------------------
 
@@ -57,11 +58,12 @@ clear_screen :-
 % Validates if given choice is member of valid choices list
 % Fails with error message if choice is invalid
 validate_choice(Choice, Choices) :-
-    member(Choice, Choices).
+  member(Choice, Choices).
+
 validate_choice(_,_) :-
-    write('Invalid choice. Please select 1-4.'), nl,
-    wait_for_enter,
-    false.
+  write('Invalid choice. Please select 1-4.'), nl,
+  wait_for_enter,
+  false.
 
 % Options text
 display_start_menu :-
@@ -80,10 +82,10 @@ display_menu(computer) :-
 % display_board_size_menu/0
 % Displays board size selection menu
 display_board_size_menu :-
-    write('Select board size (odd number between 5 and 9):'), nl,
-    write('5  - 5x5 board'), nl,
-    write('7  - 7x7 board'), nl,
-    write('9  - 9x9 board'), nl.
+  write('Select board size (odd number between 5 and 9):'), nl,
+  write('5  - 5x5 board'), nl,
+  write('7  - 7x7 board'), nl,
+  write('9  - 9x9 board'), nl.
 
 display_new_piece :-
   write('Since you have no stacks, you can place a new piece anywhere.'), nl,
@@ -105,7 +107,7 @@ display_game([Board,Next, _,_]) :-
 % display_options/0
 % Turn menu to for a move
 display_options(Moves):-
-    display_stack_drop.
+  display_stack_drop.
 
 % display_target_menu/0
 % Second menu after stack move
@@ -113,7 +115,6 @@ display_target_menu :-
   write('Now select where to move it to.'),nl,
   write('Note: it has to be an adjacent slot.'),nl,
   write('Input e.g.: (a1).'), nl.
-
 
 % display_title(+Next)
 % Show's who turn is it
@@ -134,26 +135,26 @@ display_moves(Moves) :-
   display_movesAux(Moves).
 
 display_movesAux([]).
+
 display_movesAux([[[0,0], [_,_]] | _]) :-
-    write('Put a piece wherever you like.'),nl.
+  write('Put a piece wherever you like.'),nl.
 
 display_movesAux([[[OX,OY], [X,Y]] | Rest]) :-
-    codeletter(OX, Letter1),
-    codeletter(X, Letter2),
-    write('From '), write(Letter1), write(OY), write(' to '), write(Letter2), write(Y), nl,
-    display_movesAux(Rest).
+  codeletter(OX, Letter1),
+  codeletter(X, Letter2),
+  write('From '), write(Letter1), write(OY), write(' to '), write(Letter2), write(Y), nl,
+  display_movesAux(Rest).
 
 % display_winner(+Winner)
 % End screen for the Winner
 display_winner(Winner) :-
-    playerName(Winner,WinnerName),
-    nl, nl,
-    write('      '),
-    write(WinnerName),
-    write(' wins!'),
-    write('      '), nl.
+  playerName(Winner,WinnerName),
+  nl, nl,
+  write('   '),
+  write(WinnerName),
+  write(' wins!'),nl.
 
-  %---------------------------------------------------
+%---------------------------------------------------
 % display_rows(+Board)
 % Recursively display the Board with side indications for move coordinates
 display_rows(Board) :-
@@ -164,78 +165,82 @@ display_rows(Board) :-
 
 display_column_letters_aux(0).
 display_column_letters_aux(N) :-
-    N1 is N - 1,
-    display_column_letters_aux(N1),
-    codeletter(N, Char),
-write(Char), write('   ').
+  N1 is N - 1,
+  display_column_letters_aux(N1),
+  codeletter(N, Char),
+  write(Char), write('   ').
 
 display_rowsAux([Row | _], 1, _, _) :-
-    write('1 '), 
-    display_row(Row), !.
+  write('1 '), 
+  display_row(Row), !.
 
 display_rowsAux([Row | Rest], N, 0, MaxSize):-
-    N > 0,
-    write(N), write(' '), 
-    display_row(Row), nl,
-    display_lines_row(MaxSize,0), nl,
-    N1 is N - 1,
-    display_rowsAux(Rest, N1, 1, MaxSize).
+  N > 0,
+  write(N), write(' '), 
+  display_row(Row), nl,
+  display_lines_row(MaxSize,0), nl,
+  N1 is N - 1,
+  display_rowsAux(Rest, N1, 1, MaxSize).
 
 display_rowsAux([Row | Rest], N, 1, MaxSize):-
-    N > 0,
-    write(N), write(' '), 
-    display_row(Row), nl,
-    display_lines_row(MaxSize,1), nl,
-    N1 is N - 1,
-    display_rowsAux(Rest, N1, 0, MaxSize).
+  N > 0,
+  write(N), write(' '), 
+  display_row(Row), nl,
+  display_lines_row(MaxSize,1), nl,
+  N1 is N - 1,
+  display_rowsAux(Rest, N1, 0, MaxSize).
 
 display_row([]).
+
 display_row([-| []]) :-
-    write(' ').
+  write(' ').
+
 display_row([-| Rest]) :-
-    Rest \= [],
-    write(' '),
-    write('---'),
-    display_row(Rest).
+  Rest \= [],
+  write(' '),
+  write('---'),
+  display_row(Rest).
 
 display_row([Char | []]) :-
-    lettermap(Char, Val),
-    write(Val).
+  lettermap(Char, Val),
+  write(Val).
+
 display_row([Char | Rest]) :-
-    Rest \= [],
-    lettermap(Char, Val),
-    write(Val),
-    write('---'),
-    display_row(Rest).
+  Rest \= [],
+  lettermap(Char, Val),
+  write(Val),
+  write('---'),
+  display_row(Rest).
 
 display_lines_row(Size, StartPattern) :-
-    write('|'),
-    SizeNo is Size -1,
-    display_line_segments(SizeNo, StartPattern),
-    write(' |').
-
+  write('|'),
+  SizeNo is Size -1,
+  display_line_segments(SizeNo, StartPattern),
+  write(' |').
 
 display_line_segments(0, _).
+
 display_line_segments(N, Pattern) :-
-    N > 0,
-    write(' | '),
-    display_separator(Pattern),
-    NextPattern is 1 - Pattern,
-    N1 is N - 1,
-    display_line_segments(N1, NextPattern).
+  N > 0,
+  write(' | '),
+  display_separator(Pattern),
+  NextPattern is 1 - Pattern,
+  N1 is N - 1,
+  display_line_segments(N1, NextPattern).
 
 % display_separator(+Pattern)
 % Displays separator based on current pattern (1 for /, 0 for \)
 display_separator(1) :-
-    write('/').
+  write('/').
+
 display_separator(0) :-
-    write('\\').
+  write('\\').
 
 % lettermap(+Val, -Char)
 % Maps the Y cord to a letter
 codeletter(Val, Char) :-
-    Code is Val + 96,
-    char_code(Char, Code).
+  Code is Val + 96,
+  char_code(Char, Code).
 
 
 

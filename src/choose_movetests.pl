@@ -1,11 +1,11 @@
 % Runs a series of tests to verify the functionality of the choose_move/3 predicate for different levels. 
 % If all tests pass, outputs a success message 'all choose_move tests done'.
 run_choose_move_tests :-
-  test_level1_valid_move,
-  test_level1_randomness,
-  test_level2_best_move,
-  test_level2_no_valid_moves,
-  write('all choose_move tests done'), nl.
+    test_level1_valid_move,
+    test_level1_randomness,
+    test_level2_best_move,
+    test_level2_no_valid_moves,
+    write('all choose_move tests done'), nl.
 
 % Tests that the choose_move/3 predicate for player level 1 returns a valid move from the list of valid moves.
 test_level1_valid_move :-

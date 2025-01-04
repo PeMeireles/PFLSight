@@ -79,23 +79,23 @@ valid_moves3 :-
 
 % Tests game_over/2 with no winner scenario using testBoard(g0).
 game_over_test1 :-
-    testBoard(g0, TestBoard),
-    game_over([TestBoard, a,0,0], 0).
+  testBoard(g0, TestBoard),
+  game_over([TestBoard, a,0,0], 0).
 
 % Tests game_over/2 with player 'b' winning using testBoard(g1).
 game_over_test2 :-
-    testBoard(g1, TestBoard),
-    game_over([TestBoard, a,0,0], b).
+  testBoard(g1, TestBoard),
+  game_over([TestBoard, a,0,0], b).
 
 % Tests game_over/2 with no winner scenario using testBoard(g2).
 game_over_test3 :-
-    testBoard(g2, TestBoard),
-    game_over([TestBoard, b,0,0], 0).
+  testBoard(g2, TestBoard),
+  game_over([TestBoard, b,0,0], 0).
 
 % Tests game_over/2 with no winner scenario using testBoard(g3).
 game_over_test4 :-
-    testBoard(g3, TestBoard),
-    game_over([TestBoard, a,0,0], 0).
+  testBoard(g3, TestBoard),
+  game_over([TestBoard, a,0,0], 0).
 
 % Runs tests to display and print the board representation of the current game state.
 display_tests :-
