@@ -217,10 +217,10 @@ adjacent(Row, Col, NewRow, NewCol) :-
     NewCol is Col + SCol.
 
 steps_patterns(Row, Col, Steps) :-
-    (Row + Col) mod 2 =:= 0, 
+    (Row + Col) mod 2 =:= 0,
     Steps = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].
 
-steps_patterns(Row, Col, Steps) :-
+steps_patterns(_, _, Steps) :-
     Steps = [[0,1], [0,-1], [1,0], [-1,0]].
 
 % in_sight(+GameState, +Position, -Locations)
@@ -279,12 +279,12 @@ handle_move([Board, b, P1, 0], Moves, NewState) :-
     move_type(Moves, Type),
     execute_move(Type, [Board, b, P1, 0], Moves, NewState).
     
-handle_move([Board, a, P1, P2], Moves, NewState) :-
+handle_move([Board, a, P1, P2], _, NewState) :-
     choose_move([Board, a, P1, P2], P1 , Move),
     move([Board, a, P1, P2], Move,NewState),
     wait_for_enter.
 
-handle_move([Board, b, P1, P2], Moves, NewState) :-
+handle_move([Board, b, P1, P2], _, NewState) :-
     choose_move([Board, b, P1, P2], P2 , Move),
     move([Board, b, P1, P2], Move,NewState),
     wait_for_enter.
@@ -435,7 +435,7 @@ game_over([Board, Next, _, _], Winner) :-
 game_overAux(Next, [], Winner):-
     switch_player(Next, Winner).
 
-game_overAux(Next, Moves, 0).
+game_overAux(_, _, 0).
 
 % check_no_stacks(+Moves)
 % Checks if moves start from position [0,0] (new piece placement)
@@ -495,7 +495,7 @@ find_best_move_aux([Board, Next, P1, P2], [Move|RestMoves], CurrentBestMove, Cur
 % MobilityValue: Value of a current game state according to amount of available valid moves
 % Value: Overall value of a current game state (using the previously calculated values, with different levels of "importance")
 
-value([Board, Next, _, _], Player, Value) :-
+value([Board, _, _, _], Player, Value) :-
     player_pieces(Board, Player, PlayerPieces),
     length(PlayerPieces, PlayerPieceCount),
     switch_player(Player, Opponent),

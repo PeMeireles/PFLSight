@@ -58,7 +58,7 @@ handle_input(v,Pos, Moves) :-
 handle_input(x, _, _) :-
     halt.
 
-handle_input(Input,Pos, Moves) :-
+handle_input(Input,Pos, _) :-
     valid_chess_coord(Input),
     coords_to_pos(Input, Pos).
 

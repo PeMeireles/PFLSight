@@ -13,7 +13,7 @@ genRow(Num, Row, Acc) :-
   N1 is Num -1,
   genRow(N1, Row, ['-'|Acc]).
 
-genBoard(0, Board, Row, Board).
+genBoard(0, Board, _, Board).
 
 genBoard(Num, Board, Row, Acc) :-
   Num > 0,
@@ -103,11 +103,6 @@ display_game([Board,Next, _,_]) :-
   display_title(Next),nl,
   display_rows(Board),nl.
 
-
-% display_options/0
-% Turn menu to for a move
-display_options(Moves):-
-  display_stack_drop.
 
 % display_target_menu/0
 % Second menu after stack move
