@@ -538,15 +538,3 @@ stack_value(Board, Player, Value):-
     findall(StackValue, (member((_,_,StackValue), Positions)), Values),
     sumlist(Values, Value).
 
-% valid_chess_letter(+Letter)
-% Checks if the given letter is a valid chess coordinate letter
-valid_chess_letter(Letter) :-
-    char_code(Letter, Code),
-    between(97,122,Code).
-
-% valid_chess_coord(+ChessCoord)
-% Validates if the input is a valid chess coordinate
-valid_chess_coord(ChessCoord) :-
-    atom_chars(ChessCoord, [Letter|NumberChars]),
-    valid_chess_letter(Letter),
-    NumberChars \= [].

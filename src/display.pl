@@ -38,12 +38,6 @@ lettermap(a6,'PV').
 lettermap(b5,'XZ').
 lettermap(b6,'XQ').
 
-% wait_for_enter/0
-% Pauses execution until user presses Enter
-wait_for_enter :-
-  write('Click enter to continue.'),nl,
-  get_char(_),
-  get_char(_).
 
 % clear_screen/0
 % Clears the terminal screen using ANSI escape sequences
@@ -53,17 +47,6 @@ clear_screen :-
   write('\e[H\e[2J').
 
 % -----------------------------------------------------
-
-% validate_choice(+Choice, +Choices)
-% Validates if given choice is member of valid choices list
-% Fails with error message if choice is invalid
-validate_choice(Choice, Choices) :-
-  member(Choice, Choices).
-
-validate_choice(_,_) :-
-  write('Invalid choice. Please select 1-4.'), nl,
-  wait_for_enter,
-  false.
 
 % Options text
 display_start_menu :-

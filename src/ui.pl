@@ -1,6 +1,13 @@
 :- consult(display).
 :- use_module(library(lists)).
 
+% wait_for_enter/0
+% Pauses execution until user presses Enter
+wait_for_enter :-
+  write('Click enter to continue.'),nl,
+  get_char(_),
+  get_char(_).
+
 % get_valid_choice(-Choice)
 % Gets and validates menu choice
 get_valid_choice(Choice) :-
@@ -91,3 +98,29 @@ handle_invalid_move :-
 test_piece_display :-
     write('If this character is a 4 stack white piece, it\'s working: P'), nl,
     wait_for_enter.
+
+% valid_chess_letter(+Letter)
+% Checks if the given letter is a valid chess coordinate letter
+valid_chess_letter(Letter) :-
+    char_code(Letter, Code),
+    between(97,122,Code).
+
+% valid_chess_coord(+ChessCoord)
+% Validates if the input is a valid chess coordinate
+valid_chess_coord(ChessCoord) :-
+    atom_length(ChessCoord, Length),
+    Length =:= 2,
+    atom_chars(ChessCoord, [Letter|NumberChars]),
+    valid_chess_letter(Letter),
+    NumberChars \= [].
+
+% validate_choice(+Choice, +Choices)
+% Validates if given choice is member of valid choices list
+% Fails with error message if choice is invalid
+validate_choice(Choice, Choices) :-
+  member(Choice, Choices).
+
+validate_choice(_,_) :-
+  write('Invalid choice. Please select 1-4.'), nl,
+  wait_for_enter,
+  false.
