@@ -179,7 +179,7 @@ validate_valid_stack(_, []) :-
   write('Select a valid stack'),nl,
   false.
 
-validate_valid_stack(Origin, [[Origin, _] | _ ]).
+validate_valid_stack(Origin, [[Origin, _] | _ ]) :-!.
 validate_valid_stack(Origin, [_ | T]) :-
     validate_valid_stack(Origin, T).
 
@@ -248,11 +248,11 @@ valid_moves([Board, Next, _, _], Positions) :-
 % - Height > 1: Moves from stack positions to adjacent empty positions
 valid_movesAux(Board, 0,_, Positions) :-
   % Every Position without a piece is valid 
-  empty_moves(Board, Positions), !. % Necessary to stop matching on _ when backtracking do to a false
+  empty_moves(Board, Positions).
 
 valid_movesAux(Board, 1,_, Positions) :-
   % Every Position without a piece is valid 
-  empty_moves(Board, Positions), !. % Necessary to stop matching on _ when backtracking do to a false
+  empty_moves(Board, Positions).
 
 valid_movesAux(Board, _, StackPositions, Positions) :-
     % Every Position without a piece is valid near stack Positions
