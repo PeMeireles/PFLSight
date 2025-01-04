@@ -29,9 +29,15 @@
 ## Installation and execution
 
 * Linux:
-    * [write linux instructions here]
+    * Open https://homevault.356775614.xyz/#/send/QCsj5g3dS8e0dP0p1sT_Yg/Ybl3gA6VDCmbl3iHtn36pw and download the `BitstromWeraNFWSight4.otf` file, which is our "Sight Font";
+    * Install the font;
+    * Change the font to BitstromWera Nerd Font in your terminal. (If you are using Gnome Terminal, you might have to change the default monotext font in gnome-tweaks and use the default one on it);
+    * To run our game open the terminal and run the following command `/home/[yourUser]/.prolog/bin/sicstus -l src/game.pl`, your SICStus instalation might be in a diferent directory;
+    * Adjust font size with `ctrl +` until everything is visible;
+    * Type "play." into the command line of your SICStus Prolog 4.9 window;
+    * The game is now open and ready to play.
 * Windows:
-    * Open this link https://homevault.356775614.xyz/#/send/QCsj5g3dS8e0dP0p1sT_Yg/Ybl3gA6VDCmbl3iHtn36pw and download the `BitstromWeraNFWSight4.otf` file, which is our "Sight Font";
+    * Open https://homevault.356775614.xyz/#/send/QCsj5g3dS8e0dP0p1sT_Yg/Ybl3gA6VDCmbl3iHtn36pw and download the `BitstromWeraNFWSight4.otf` file, which is our "Sight Font";
     * Open the file and click the "Install" button on the top left corner;
     * Open SICStus Prolog 4.9;
     * Go to Settings > Font;
@@ -45,6 +51,8 @@
     * Open the game.pl file;
     * Type "play." into the command line of your SICStus Prolog 4.9 window;
     * The game is now open and ready to play.
+
+**Note:** Due to the way prolog read works, a '.' must be placed after each command in the terminal (e.g.: '1.', 'a1.', 'v.', etc.)
 
 ### Description of the game
 
@@ -118,7 +126,7 @@ The `initial_state/2` predicate uses the `board/2` predicate to generate an empt
 ### Move Representation
 
 * A move is represented as a list: `[Origin, Target]`:
-    * **Origin:** list [Row, Col] representing the starting position of the move. For a new piece placement, the origin is ''.
+    * **Origin:** list [Row, Col] representing the starting position of the move. For a new piece placement, the origin is [0,0].
     * **Target:** list [Row, Col] representing the destination position of the move.
 
 **The `move/3` predicate uses this representation to validate and execute a move.**
