@@ -92,7 +92,8 @@
     * **P1Type and P2Type:** indicate the type of each player:
         * `0`: human;
         * `1`: random AI;
-        * `2`: smart AI.
+        * `2`: smart AI;
+        * `3`: smarter AI;
 
 **This tuple is used by the `initial_state/2` predicate to set up the initial game state.**
 
