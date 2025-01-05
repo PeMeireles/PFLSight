@@ -96,7 +96,7 @@ fontTest :-
   write(Val8),nl.
 
 
-% Testboards used for testing
+% Testboards used for testing most of them are unreachable
 testBoard(1, [[-,-,-,-,-], 
               [-,-,-,-,-],
               [-,-,-,-,-],

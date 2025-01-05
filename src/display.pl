@@ -1,25 +1,3 @@
-% board(+Size, -Board)
-% Generates empty board of Size x Size dimensions
-% Size must be odd number (7, 9, 11, etc.)
-board(Num, Board) :-
-  Num mod 2 =:= 1,
-  genRow(Num, Row, []),
-  genBoard(Num, Board, Row, []).
-
-genRow(0, Row, Row).
-
-genRow(Num, Row, Acc) :-
-  Num > 0,
-  N1 is Num -1,
-  genRow(N1, Row, ['-'|Acc]).
-
-genBoard(0, Board, _, Board).
-
-genBoard(Num, Board, Row, Acc) :-
-  Num > 0,
-  N1 is Num -1,
-  genBoard(N1, Board, Row, [Row|Acc]).
-
 playerName(a,'player 1').
 playerName(b,'player 2').
 
@@ -80,6 +58,13 @@ display_stack_drop :-
   write('Input e.g.: (a1).'),nl,
   write('Hint: You can type \'v\' to see what moves you can do.'), nl.
 
+% display_test_piece_display/0
+% Tests piece display functionality
+display_test_piece_display :-
+    write('If this character is a 4 stack white piece, it\'s working: P'), nl,
+    wait_for_enter.
+
+
  % --------------------------- 
 % display_game/0
 % Turn interface
@@ -100,7 +85,7 @@ display_target_menu :-
 display_title(Next):- 
   playerName(Next,PlayerName),
   clear_screen, 
-  write('Type \'x\' to close at any time.'), nl,
+  write('Type \'x\' to close in your turn.'), nl,
   write(' '),nl,
   write('It\'s '),
   write(PlayerName),

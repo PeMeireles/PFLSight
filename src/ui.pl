@@ -1,6 +1,28 @@
 :- consult(display).
 :- use_module(library(lists)).
 
+% board(+Size, -Board)
+% Generates empty board of Size x Size dimensions
+% Size must be odd number (7, 9, 11, etc.)
+board(Num, Board) :-
+  Num mod 2 =:= 1,
+  genRow(Num, Row, []),
+  genBoard(Num, Board, Row, []).
+
+genRow(0, Row, Row).
+
+genRow(Num, Row, Acc) :-
+  Num > 0,
+  N1 is Num -1,
+  genRow(N1, Row, ['-'|Acc]).
+
+genBoard(0, Board, _, Board).
+
+genBoard(Num, Board, Row, Acc) :-
+  Num > 0,
+  N1 is Num -1,
+  genBoard(N1, Board, Row, [Row|Acc]).
+
 % wait_for_enter/0
 % Pauses execution until user presses Enter
 wait_for_enter :-
@@ -93,12 +115,6 @@ handle_invalid_move :-
     wait_for_enter,
     clear_screen.
 
-% test_piece_display/0
-% Tests piece display functionality
-test_piece_display :-
-    write('If this character is a 4 stack white piece, it\'s working: P'), nl,
-    wait_for_enter.
-
 % valid_chess_letter(+Letter)
 % Checks if the given letter is a valid chess coordinate letter
 valid_chess_letter(Letter) :-
@@ -121,6 +137,13 @@ validate_choice(Choice, Choices) :-
   member(Choice, Choices).
 
 validate_choice(_,_) :-
-  write('Invalid choice. Please select 1-4.'), nl,
+  write('Invalid choice.'), nl,
   wait_for_enter,
   false.
+
+% validate_board_size(+Size)
+% Validates if size is odd and within bounds
+validate_board_size(Size) :-
+    number(Size),
+    Size mod 2 =:= 1,
+    between(5, 9, Size).

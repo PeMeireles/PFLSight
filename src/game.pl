@@ -4,6 +4,12 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+switch_player(a, b).
+switch_player(b, a).
+
+firstpiece(a, a1).
+firstpiece(b, b1).
+
 % play/0
 % Main entry point for the game
 play :- 
@@ -31,20 +37,14 @@ setup_game_options(4, (Size, AI1, AI2)) :-
     get_ai_type(AI2).
 
 setup_game_options(5, _) :-
-    test_piece_display,
+    display_test_piece_display,
     fail.
-
-% validate_board_size(+Size)
-% Validates if size is odd and within bounds
-validate_board_size(Size) :-
-    Size mod 2 =:= 1,
-    between(5, 9, Size).
 
 % start_game(+Options)
 % Initializes and starts game with given configuration
 % Options: (Size, P1Type, P2Type) where:
 %   Size: Board size
-%   P1Type/P2Type: Player types (0-human, 1-random AI, 2-smart AI)
+%   P1Type/P2Type: Player types (0-human, 1-random AI, 2-smart AI, 3-smarter AI)
 start_game(Options) :-
     initial_state(Options, GameState),
     game_loop(GameState).
@@ -53,8 +53,8 @@ start_game(Options) :-
 % Creates initial game state from configuration
 % Config: (Size, P1, P2) where:
 %   Size: Board size
-%   P1: Player 1 type (0-human, 1-random AI, 2-smart AI)
-%   P2: Player 2 type (0-human, 1-random AI, 2-smart AI)
+%   P1: Player 1 type (0-human, 1-random AI, 2-smart AI, 3-smarter AI)
+%   P2: Player 2 type (0-human, 1-random AI, 2-smart AI, 3-smarter AI)
 % GameState: [Board, CurrentPlayer, P1Type, P2Type]
 initial_state((Size, P1, P2), [Board, Next, P1, P2]) :-
   board(Size,Board),
@@ -262,12 +262,6 @@ first_sight([Board, Next, _, _], [Row, Col], [DirectionX, DirectionY], [FRow, FC
   access_board(Board, [FRow, FCol], Piece),
   Piece \= '-', !,
   atom_chars(Piece, [Next|_]).
-
-switch_player(a, b).
-switch_player(b, a).
-
-firstpiece(a, a1).
-firstpiece(b, b1).
 
 % handle_move(+GameState, +ValidMoves, -NewState)
 % Handles move input based on game state and AIType
